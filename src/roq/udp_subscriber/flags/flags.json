@@ -1,0 +1,19 @@
+{
+  "name": "Flags",
+  "type": "flags",
+  "values": [
+    {
+      "name": "config_file",
+      "type": "std::string",
+      "validator": "roq::core::flags::Path<std::string>",
+      "description": "config file (path)"
+    },
+    {
+      "name": "exchange",
+      "type": "std::string",
+      "validator": "roq::core::flags::NonEmpty<std::string>",
+      "default": "pubsub",
+      "description": "exchange identifier (string)"
+    }
+  ]
+}
