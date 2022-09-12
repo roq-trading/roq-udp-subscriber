@@ -1,0 +1,65 @@
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
+
+#include "roq/udp_subscriber/fbs_parser.hpp"
+
+#include <nlohmann/json.hpp>
+
+#include "roq/logging.hpp"
+
+#include "roq/debug/hex/message.hpp"
+
+using namespace std::literals;
+
+namespace roq {
+namespace udp_subscriber {
+
+namespace {
+std::string_view get_string_view(auto &obj) {
+  if (obj.is_null())
+    return {};
+  return obj.template get<std::string_view>();
+}
+}  // namespace
+
+size_t FBSParser::dispatch(
+    Handler &handler, std::span<std::byte const> const &buffer, TraceInfo const &trace_info, Shared &shared) {
+  log::debug("{}"sv, std::string_view{reinterpret_cast<char const *>(std::data(buffer)), std::size(buffer)});
+  auto json = nlohmann::json::parse(buffer);
+  auto type = json[0].get<std::string_view>();
+  log::debug(R"(type="{}")"sv, type);
+  if (type.compare("Heartbeat"sv) == 0) {
+  } else if (type.compare("TopOfBook"sv) == 0) {
+  } else if (type.compare("CustomMetricsUpdate"sv) == 0) {
+    // note! CustomMetricsUpdate --> CustomMetrics
+    auto &measurements = shared.measurements;
+    measurements.clear();
+    auto obj = json[1];
+    auto label = obj["label"sv].get<std::string_view>();
+    auto account = get_string_view(obj["account"sv]);
+    auto exchange = obj["exchange"sv].get<std::string_view>();
+    auto symbol = obj["symbol"sv].get<std::string_view>();
+    for (auto &item : obj["measurements"sv]) {
+      auto name = item["name"sv].get<std::string_view>();
+      auto value = item["value"sv].get<double>();
+      measurements.push_back({name, value});
+    }
+    auto update_type = obj["update_type"sv].get<std::string_view>();
+    CustomMetrics const custom_metrics{
+        .label = label,
+        .account = account,
+        .exchange = exchange,
+        .symbol = symbol,
+        .measurements = measurements,
+        .update_type = magic_enum::enum_cast<UpdateType>(update_type).value(),
+    };
+    log::debug("{}"sv, custom_metrics);
+    create_trace_and_dispatch(handler, trace_info, custom_metrics);
+  } else {
+    log::warn(R"(Unexpected: type="{}")"sv, type);
+    return 0;
+  }
+  return std::size(buffer);
+}
+
+}  // namespace udp_subscriber
+}  // namespace roq

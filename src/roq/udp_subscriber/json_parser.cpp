@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/udp_subscriber/parser.hpp"
+#include "roq/udp_subscriber/json_parser.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -21,7 +21,7 @@ std::string_view get_string_view(auto &obj) {
 }
 }  // namespace
 
-size_t Parser::dispatch(
+size_t JSONParser::dispatch(
     Handler &handler, std::span<std::byte const> const &buffer, TraceInfo const &trace_info, Shared &shared) {
   log::debug("{}"sv, std::string_view{reinterpret_cast<char const *>(std::data(buffer)), std::size(buffer)});
   auto json = nlohmann::json::parse(buffer);

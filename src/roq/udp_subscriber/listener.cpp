@@ -8,6 +8,8 @@
 
 #include "roq/udp_subscriber/flags.hpp"
 
+#include "roq/udp_subscriber/parser_factory.hpp"
+
 using namespace std::literals;
 
 namespace roq {
@@ -22,7 +24,8 @@ auto create_receiver(auto &handler, auto &context) {
 }  // namespace
 
 Listener::Listener(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), shared_(shared), receiver_(create_receiver(*this, context)) {
+    : handler_(handler), stream_id_(stream_id), shared_(shared), receiver_(create_receiver(*this, context)),
+      parser_(ParserFactory::create()) {
 }
 
 void Listener::operator()(Event<Start> const &) {
@@ -42,7 +45,7 @@ void Listener::operator()(io::net::udp::Receiver::Read const &) {
   while (receive_buffer_.append(*receiver_)) {
     auto message = std::data(receive_buffer_);
     log::info<5>("received {} byte(s)"sv, std::size(message));
-    auto bytes = Parser::dispatch(*this, message, trace_info, shared_);
+    auto bytes = (*parser_).dispatch(*this, message, trace_info, shared_);
     if (!bytes || bytes != std::size(message)) {
       log::warn("{}"sv, debug::hex::Message{message});
       log::fatal("Failed to parse message"sv);

@@ -2,9 +2,6 @@
 
 #pragma once
 
-#include <cstdint>
-#include <span>
-
 #include "roq/trace.hpp"
 
 #include "roq/custom_metrics_update.hpp"
@@ -15,13 +12,15 @@
 namespace roq {
 namespace udp_subscriber {
 
-struct Parser final {
+struct Parser {
   struct Handler {
     virtual void operator()(Trace<TopOfBook const> const &) = 0;
     virtual void operator()(Trace<CustomMetrics const> const &) = 0;
   };
 
-  static size_t dispatch(Handler &, std::span<std::byte const> const &buffer, TraceInfo const &, Shared &);
+  virtual ~Parser() {}
+
+  virtual size_t dispatch(Handler &, std::span<std::byte const> const &buffer, TraceInfo const &, Shared &) = 0;
 };
 
 }  // namespace udp_subscriber

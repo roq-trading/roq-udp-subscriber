@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "roq/server.hpp"
 
 #include "roq/io/buffer.hpp"
@@ -48,6 +50,8 @@ class Listener final : public io::net::udp::Receiver::Handler, public Parser::Ha
   // io
   std::unique_ptr<io::net::udp::Receiver> receiver_;
   io::Buffer receive_buffer_;
+  // parser
+  std::unique_ptr<Parser> parser_;
 };
 
 }  // namespace udp_subscriber

@@ -5,10 +5,12 @@ add_subdirectory(flags)
 set(SOURCES
     application.cpp
     config.cpp
+    fbs_parser.cpp
     flags.cpp
     gateway.cpp
+    json_parser.cpp
     listener.cpp
-    parser.cpp
+    parser_factory.cpp
     shared.cpp
     main.cpp)
 
