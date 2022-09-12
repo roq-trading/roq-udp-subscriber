@@ -7,14 +7,15 @@
 #include "roq/io/context.hpp"
 
 #include "roq/udp_subscriber/config.hpp"
+#include "roq/udp_subscriber/listener.hpp"
 #include "roq/udp_subscriber/shared.hpp"
 
 namespace roq {
 namespace udp_subscriber {
 
-class Gateway final : public server::Handler {
+class Gateway final : public server::Handler, public Listener::Handler {
  public:
-  Gateway(server::Dispatcher &, Config const &);
+  Gateway(server::Dispatcher &, Config const &, io::Context &);
 
  protected:
   void operator()(Event<Start> const &) override;
@@ -39,15 +40,20 @@ class Gateway final : public server::Handler {
 
   void operator()(metrics::Writer &) override;
 
+  // many
+  void operator()(Trace<TopOfBook const> const &, bool is_last) override;
+  void operator()(Trace<CustomMetrics const> const &, bool is_last) override;
+
  private:
   server::Dispatcher &dispatcher_;
   // io
-  std::unique_ptr<io::Context> context_;
+  io::Context &context_;
   // shared
   Shared shared_;
   // seed
   uint16_t stream_id_ = {};
   // streams
+  Listener listener_;
 };
 
 }  // namespace udp_subscriber

@@ -4,8 +4,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/io/engine/context_factory.hpp"
-
 #include "roq/udp_subscriber/flags.hpp"
 
 using namespace std::literals;
@@ -13,8 +11,9 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
-Gateway::Gateway(server::Dispatcher &dispatcher, Config const &)
-    : dispatcher_(dispatcher), context_(io::engine::ContextFactory::create_libevent()), shared_(dispatcher) {
+Gateway::Gateway(server::Dispatcher &dispatcher, Config const &, io::Context &context)
+    : dispatcher_(dispatcher), context_(context), shared_(dispatcher),
+      listener_(*this, context, ++stream_id_, shared_) {
 }
 
 void Gateway::operator()(Event<Start> const &) {
@@ -26,7 +25,7 @@ void Gateway::operator()(Event<Stop> const &) {
 }
 
 void Gateway::operator()(Event<Timer> const &) {
-  (*context_).drain();
+  context_.drain();
 }
 
 void Gateway::operator()(Event<Connected> const &) {
@@ -61,6 +60,14 @@ uint16_t Gateway::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] st
 }
 
 void Gateway::operator()(metrics::Writer &) {
+}
+
+void Gateway::operator()(Trace<TopOfBook const> const &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
+void Gateway::operator()(Trace<CustomMetrics const> const &event, bool is_last) {
+  dispatcher_(event, is_last);
 }
 
 }  // namespace udp_subscriber

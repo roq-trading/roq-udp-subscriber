@@ -31,6 +31,9 @@ struct Shared final {
 
  private:
   server::Dispatcher &dispatcher_;
+
+ public:
+  std::vector<Measurement> measurements;
 };
 
 }  // namespace udp_subscriber
