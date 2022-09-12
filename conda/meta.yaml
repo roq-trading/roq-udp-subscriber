@@ -21,6 +21,7 @@ requirements:
     - cmake
     - make
   host:
+    - nlohmann_json
     - roq-core
     - abseil-cpp
     - roq-oss-benchmark
