@@ -41,7 +41,7 @@ size_t Parser::dispatch(
     for (auto &item : obj["measurements"sv]) {
       auto name = item["name"sv].get<std::string_view>();
       auto value = item["value"sv].get<double>();
-      measurements.emplace_back(name, value);
+      measurements.push_back({name, value});
     }
     auto update_type = obj["update_type"sv].get<std::string_view>();
     CustomMetrics const custom_metrics{
