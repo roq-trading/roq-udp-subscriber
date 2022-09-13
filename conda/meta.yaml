@@ -21,6 +21,7 @@ requirements:
     - cmake
     - make
   host:
+    - flatbuffers
     - nlohmann_json
     - roq-core
     - abseil-cpp
