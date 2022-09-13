@@ -2,63 +2,71 @@
 
 #include "roq/udp_subscriber/fbs_parser.hpp"
 
-#include <nlohmann/json.hpp>
+#include "roq/debug/hex/message.hpp"
 
 #include "roq/logging.hpp"
 
-#include "roq/debug/hex/message.hpp"
+#include "roq/core/clock.hpp"
+#include "roq/core/patterns.hpp"
 
 using namespace std::literals;
 
 namespace roq {
 namespace udp_subscriber {
 
-namespace {
-std::string_view get_string_view(auto &obj) {
-  if (obj.is_null())
-    return {};
-  return obj.template get<std::string_view>();
+void FBSParser::dispatch_helper(
+    Handler &handler,
+    std::span<std::byte const> const &payload,
+    [[maybe_unused]] TraceInfo const &,
+    Shared &shared,
+    [[maybe_unused]] core::udp::Frame const &) {
+  // log::debug("{}"sv, debug::hex::Message{payload});
+  auto event = core::fbs::Decoder::create_event(payload);
+  auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
+  shared.decoder.dispatch(
+      overloaded{
+          [](Event<DownloadBegin> const &) {},
+          [](Event<DownloadEnd> const &) {},
+          [](Event<GatewaySettings> const &) {},
+          [](Event<StreamStatus> const &) {},
+          [](Event<ExternalLatency> const &) {},
+          [](Event<RateLimitTrigger> const &) {},
+          [](Event<GatewayStatus> const &) {},
+          [](Event<ReferenceData> const &) {},
+          [](Event<MarketStatus> const &) {},
+          [&](Event<TopOfBook> const &event) { dispatch(handler, event); },
+          [](Event<MarketByPriceUpdate> const &) {},
+          [](Event<MarketByOrderUpdate> const &) {},
+          [](Event<TradeSummary> const &) {},
+          [](Event<StatisticsUpdate> const &) {},
+          [](Event<CreateOrder> const &) {},
+          [](Event<ModifyOrder> const &) {},
+          [](Event<CancelOrder> const &) {},
+          [](Event<CancelAllOrders> const &) {},
+          [](Event<OrderAck> const &) {},
+          [](Event<OrderUpdate> const &) {},
+          [](Event<TradeUpdate> const &) {},
+          [](Event<PositionUpdate> const &) {},
+          [](Event<FundsUpdate> const &) {},
+          [](Event<CustomMetrics> const &) {},
+          [&](Event<CustomMetricsUpdate> const &event) { dispatch(handler, event); },
+          [](Event<ParameterUpdate> const &) {},
+      },
+      event,
+      message_info);
 }
-}  // namespace
 
-size_t FBSParser::dispatch(
-    Handler &handler, std::span<std::byte const> const &buffer, TraceInfo const &trace_info, Shared &shared) {
-  log::debug("{}"sv, std::string_view{reinterpret_cast<char const *>(std::data(buffer)), std::size(buffer)});
-  auto json = nlohmann::json::parse(buffer);
-  auto type = json[0].get<std::string_view>();
-  log::debug(R"(type="{}")"sv, type);
-  if (type.compare("Heartbeat"sv) == 0) {
-  } else if (type.compare("TopOfBook"sv) == 0) {
-  } else if (type.compare("CustomMetricsUpdate"sv) == 0) {
-    // note! CustomMetricsUpdate --> CustomMetrics
-    auto &measurements = shared.measurements;
-    measurements.clear();
-    auto obj = json[1];
-    auto label = obj["label"sv].get<std::string_view>();
-    auto account = get_string_view(obj["account"sv]);
-    auto exchange = obj["exchange"sv].get<std::string_view>();
-    auto symbol = obj["symbol"sv].get<std::string_view>();
-    for (auto &item : obj["measurements"sv]) {
-      auto name = item["name"sv].get<std::string_view>();
-      auto value = item["value"sv].get<double>();
-      measurements.push_back({name, value});
-    }
-    auto update_type = obj["update_type"sv].get<std::string_view>();
-    CustomMetrics const custom_metrics{
-        .label = label,
-        .account = account,
-        .exchange = exchange,
-        .symbol = symbol,
-        .measurements = measurements,
-        .update_type = magic_enum::enum_cast<UpdateType>(update_type).value(),
-    };
-    log::debug("{}"sv, custom_metrics);
-    create_trace_and_dispatch(handler, trace_info, custom_metrics);
-  } else {
-    log::warn(R"(Unexpected: type="{}")"sv, type);
-    return 0;
-  }
-  return std::size(buffer);
+template <typename T>
+void FBSParser::dispatch(Handler &handler, Event<T> const &event) {
+  auto &[message_info, value] = event;
+  auto now = core::clock::GetSystem();
+  TraceInfo trace_info{
+      .source_receive_time = now,
+      .origin_create_time = now,
+      .origin_create_time_utc = message_info.origin_create_time_utc,
+  };
+  Trace trace{trace_info, value};
+  handler(trace);
 }
 
 }  // namespace udp_subscriber

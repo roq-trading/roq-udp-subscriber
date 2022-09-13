@@ -10,7 +10,7 @@ set(SOURCES
     gateway.cpp
     json_parser.cpp
     listener.cpp
-    parser_factory.cpp
+    parser.cpp
     shared.cpp
     main.cpp)
 

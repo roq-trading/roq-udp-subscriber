@@ -6,8 +6,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/debug/hex/message.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -21,16 +19,19 @@ std::string_view get_string_view(auto &obj) {
 }
 }  // namespace
 
-size_t JSONParser::dispatch(
-    Handler &handler, std::span<std::byte const> const &buffer, TraceInfo const &trace_info, Shared &shared) {
-  log::debug("{}"sv, std::string_view{reinterpret_cast<char const *>(std::data(buffer)), std::size(buffer)});
-  auto json = nlohmann::json::parse(buffer);
+void JSONParser::dispatch_helper(
+    Handler &handler,
+    std::span<std::byte const> const &payload,
+    TraceInfo const &trace_info,
+    Shared &shared,
+    core::udp::Frame const &frame) {
+  auto message = std::string_view{reinterpret_cast<char const *>(std::data(payload)), std::size(payload)};
+  auto json = nlohmann::json::parse(message);
   auto type = json[0].get<std::string_view>();
   log::debug(R"(type="{}")"sv, type);
   if (type.compare("Heartbeat"sv) == 0) {
   } else if (type.compare("TopOfBook"sv) == 0) {
   } else if (type.compare("CustomMetricsUpdate"sv) == 0) {
-    // note! CustomMetricsUpdate --> CustomMetrics
     auto &measurements = shared.measurements;
     measurements.clear();
     auto obj = json[1];
@@ -44,7 +45,8 @@ size_t JSONParser::dispatch(
       measurements.push_back({name, value});
     }
     auto update_type = obj["update_type"sv].get<std::string_view>();
-    CustomMetrics const custom_metrics{
+    CustomMetricsUpdate const custom_metrics_update{
+        .user = {},
         .label = label,
         .account = account,
         .exchange = exchange,
@@ -52,13 +54,11 @@ size_t JSONParser::dispatch(
         .measurements = measurements,
         .update_type = magic_enum::enum_cast<UpdateType>(update_type).value(),
     };
-    log::debug("{}"sv, custom_metrics);
-    create_trace_and_dispatch(handler, trace_info, custom_metrics);
+    log::debug("{} {}"sv, frame, custom_metrics_update);
+    create_trace_and_dispatch(handler, trace_info, custom_metrics_update);
   } else {
     log::warn(R"(Unexpected: type="{}")"sv, type);
-    return 0;
   }
-  return std::size(buffer);
 }
 
 }  // namespace udp_subscriber

@@ -15,12 +15,10 @@ namespace udp_subscriber {
 struct Parser {
   struct Handler {
     virtual void operator()(Trace<TopOfBook const> const &) = 0;
-    virtual void operator()(Trace<CustomMetrics const> const &) = 0;
+    virtual void operator()(Trace<CustomMetricsUpdate const> const &) = 0;
   };
 
-  virtual ~Parser() {}
-
-  virtual size_t dispatch(Handler &, std::span<std::byte const> const &buffer, TraceInfo const &, Shared &) = 0;
+  static size_t dispatch(Handler &, std::span<std::byte const> const &buffer, TraceInfo const &, Shared &);
 };
 
 }  // namespace udp_subscriber

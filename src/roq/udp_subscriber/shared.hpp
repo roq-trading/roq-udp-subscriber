@@ -12,7 +12,7 @@
 #include "roq/api.hpp"
 #include "roq/server.hpp"
 
-#include "roq/core/memory.hpp"
+#include "roq/core/fbs/decoder.hpp"
 
 namespace roq {
 namespace udp_subscriber {
@@ -34,6 +34,8 @@ struct Shared final {
 
  public:
   std::vector<Measurement> measurements;
+
+  core::fbs::Decoder decoder;
 };
 
 }  // namespace udp_subscriber

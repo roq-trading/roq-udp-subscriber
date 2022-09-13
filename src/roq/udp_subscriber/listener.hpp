@@ -39,7 +39,7 @@ class Listener final : public io::net::udp::Receiver::Handler, public Parser::Ha
 
   // Parser::Handler
   void operator()(Trace<TopOfBook const> const &) override;
-  void operator()(Trace<CustomMetrics const> const &) override;
+  void operator()(Trace<CustomMetricsUpdate const> const &) override;
 
  private:
   Handler &handler_;
@@ -50,8 +50,6 @@ class Listener final : public io::net::udp::Receiver::Handler, public Parser::Ha
   // io
   std::unique_ptr<io::net::udp::Receiver> receiver_;
   io::Buffer receive_buffer_;
-  // parser
-  std::unique_ptr<Parser> parser_;
 };
 
 }  // namespace udp_subscriber

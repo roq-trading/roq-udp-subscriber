@@ -8,8 +8,6 @@
 
 #include "roq/udp_subscriber/flags.hpp"
 
-#include "roq/udp_subscriber/parser_factory.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -24,8 +22,7 @@ auto create_receiver(auto &handler, auto &context) {
 }  // namespace
 
 Listener::Listener(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), shared_(shared), receiver_(create_receiver(*this, context)),
-      parser_(ParserFactory::create()) {
+    : handler_(handler), stream_id_(stream_id), shared_(shared), receiver_(create_receiver(*this, context)) {
 }
 
 void Listener::operator()(Event<Start> const &) {
@@ -45,7 +42,7 @@ void Listener::operator()(io::net::udp::Receiver::Read const &) {
   while (receive_buffer_.append(*receiver_)) {
     auto message = std::data(receive_buffer_);
     log::info<5>("received {} byte(s)"sv, std::size(message));
-    auto bytes = (*parser_).dispatch(*this, message, trace_info, shared_);
+    auto bytes = Parser::dispatch(*this, message, trace_info, shared_);
     if (!bytes || bytes != std::size(message)) {
       log::warn("{}"sv, debug::hex::Message{message});
       log::fatal("Failed to parse message"sv);
@@ -63,9 +60,18 @@ void Listener::operator()(Trace<TopOfBook const> const &event) {
   handler_(event, true);
 }
 
-void Listener::operator()(Trace<CustomMetrics const> const &event) {
+void Listener::operator()(Trace<CustomMetricsUpdate const> const &event) {
   log::info<3>("{}"sv, event.value);
-  handler_(event, true);
+  auto &[trace_info, value] = event;
+  CustomMetrics const custom_metrics{
+      .label = value.label,
+      .account = value.account,
+      .exchange = value.exchange,
+      .symbol = value.symbol,
+      .measurements = value.measurements,
+      .update_type = value.update_type,
+  };
+  create_trace_and_dispatch(handler_, trace_info, custom_metrics, true);
 }
 
 }  // namespace udp_subscriber

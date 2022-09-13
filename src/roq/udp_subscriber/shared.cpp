@@ -7,7 +7,7 @@
 namespace roq {
 namespace udp_subscriber {
 
-Shared::Shared(server::Dispatcher &dispatcher) : dispatcher_(dispatcher) {
+Shared::Shared(server::Dispatcher &dispatcher) : dispatcher_(dispatcher), decoder(1024, 1024, 1024, 1024, 1024, 1024) {
 }
 
 }  // namespace udp_subscriber
