@@ -23,20 +23,25 @@ size_t Parser::dispatch(
     Frame frame;
     std::memcpy(&frame, std::data(buffer), sizeof(frame));
     if (frame.magic == core::udp::MAGIC) {
+      // ...
       if (frame.total_fragments == 1 && frame.fragment_number == 0) {
         auto payload = buffer.subspan(sizeof(frame));
-        switch (frame.encoding) {
-          using enum core::udp::Encoding;
-          case UNDEFINED:
-            break;
-          case NATIVE:
-            break;
-          case FLATBUFFERS:
-            FBSParser::dispatch_helper(handler, payload, trace_info, shared, frame);
-            break;
-          case JSON:
-            JSONParser::dispatch_helper(handler, payload, trace_info, shared, frame);
-            break;
+        if (!std::empty(payload)) {
+          switch (frame.encoding) {
+            using enum core::udp::Encoding;
+            case UNDEFINED:
+              break;
+            case NATIVE:
+              break;
+            case FLATBUFFERS:
+              FBSParser::dispatch_helper(handler, payload, trace_info, shared, frame);
+              break;
+            case JSON:
+              JSONParser::dispatch_helper(handler, payload, trace_info, shared, frame);
+              break;
+          }
+        } else {
+          // heartbeat
         }
         return std::size(buffer);
       } else {
