@@ -19,7 +19,7 @@ void FBSParser::dispatch_helper(
     std::span<std::byte const> const &payload,
     [[maybe_unused]] TraceInfo const &,
     Shared &shared,
-    [[maybe_unused]] core::udp::Frame const &) {
+    core::udp::Frame const &frame) {
   // log::debug("{}"sv, debug::hex::Message{payload});
   auto event = core::fbs::Decoder::create_event(payload);
   auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
@@ -34,7 +34,7 @@ void FBSParser::dispatch_helper(
           [](Event<GatewayStatus> const &) {},
           [](Event<ReferenceData> const &) {},
           [](Event<MarketStatus> const &) {},
-          [&](Event<TopOfBook> const &event) { dispatch(handler, event); },
+          [&](Event<TopOfBook> const &event) { dispatch(handler, event, frame); },
           [](Event<MarketByPriceUpdate> const &) {},
           [](Event<MarketByOrderUpdate> const &) {},
           [](Event<TradeSummary> const &) {},
@@ -49,7 +49,7 @@ void FBSParser::dispatch_helper(
           [](Event<PositionUpdate> const &) {},
           [](Event<FundsUpdate> const &) {},
           [](Event<CustomMetrics> const &) {},
-          [&](Event<CustomMetricsUpdate> const &event) { dispatch(handler, event); },
+          [&](Event<CustomMetricsUpdate> const &event) { dispatch(handler, event, frame); },
           [](Event<ParameterUpdate> const &) {},
       },
       event,
@@ -57,7 +57,7 @@ void FBSParser::dispatch_helper(
 }
 
 template <typename T>
-void FBSParser::dispatch(Handler &handler, Event<T> const &event) {
+void FBSParser::dispatch(Handler &handler, Event<T> const &event, core::udp::Frame const &frame) {
   auto &[message_info, value] = event;
   auto now = core::clock::GetSystem();
   TraceInfo trace_info{
@@ -66,7 +66,7 @@ void FBSParser::dispatch(Handler &handler, Event<T> const &event) {
       .origin_create_time_utc = message_info.origin_create_time_utc,
   };
   Trace trace{trace_info, value};
-  handler(trace);
+  handler(trace, frame);
 }
 
 }  // namespace udp_subscriber

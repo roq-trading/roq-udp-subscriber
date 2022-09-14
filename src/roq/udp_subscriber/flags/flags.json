@@ -21,12 +21,19 @@
       "default": 0,
       "description": "udp port"
     },
-    {                                                                                                                      
-      "name": "encoding",                                                                                                  
-      "type": "std::string",                                                                                               
-      "validator": "roq::core::flags::NonEmpty<std::string>",                                                              
-      "default": "flatbuffers",                                                                                            
-      "description": "exchange identifier (string)"                                                                        
+    {
+      "name": "heartbeat_timeout",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "10s",
+      "description": "heartbeat timeout"
+    },
+    {
+      "name": "encoding",
+      "type": "std::string",
+      "validator": "roq::core::flags::NonEmpty<std::string>",
+      "default": "flatbuffers",
+      "description": "exchange identifier (string)"
     }
   ]
 }

@@ -30,7 +30,7 @@ size_t Parser::dispatch(
     return 0;
   }
   // ...
-  if (frame.total_fragments == 0 && frame.fragment_number == 0) {
+  if (frame.fragment_number == 0 && frame.fragment_number_max == 0) {
     auto payload = buffer.subspan(sizeof(frame));
     if (!std::empty(payload)) {
       switch (frame.encoding) {
@@ -47,8 +47,8 @@ size_t Parser::dispatch(
           break;
       }
     } else {
-      // heartbeat
-      log::info<1>("HEARTBEAT"sv);
+      Heartbeat const heartbeat{};
+      create_trace_and_dispatch(handler, trace_info, heartbeat, frame);
     }
     return std::size(buffer);
   } else {

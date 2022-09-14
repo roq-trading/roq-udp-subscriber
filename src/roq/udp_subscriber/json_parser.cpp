@@ -29,8 +29,7 @@ void JSONParser::dispatch_helper(
   auto json = nlohmann::json::parse(message);
   auto type = json[0].get<std::string_view>();
   log::debug(R"(type="{}")"sv, type);
-  if (type.compare("Heartbeat"sv) == 0) {
-  } else if (type.compare("TopOfBook"sv) == 0) {
+  if (type.compare("TopOfBook"sv) == 0) {
   } else if (type.compare("CustomMetricsUpdate"sv) == 0) {
     auto &measurements = shared.measurements;
     measurements.clear();
@@ -55,7 +54,7 @@ void JSONParser::dispatch_helper(
         .update_type = magic_enum::enum_cast<UpdateType>(update_type).value(),
     };
     log::debug("{} {}"sv, frame, custom_metrics_update);
-    create_trace_and_dispatch(handler, trace_info, custom_metrics_update);
+    create_trace_and_dispatch(handler, trace_info, custom_metrics_update, frame);
   } else {
     log::warn(R"(Unexpected: type="{}")"sv, type);
   }

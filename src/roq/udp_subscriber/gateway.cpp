@@ -16,16 +16,19 @@ Gateway::Gateway(server::Dispatcher &dispatcher, Config const &, io::Context &co
       listener_(*this, context, ++stream_id_, shared_) {
 }
 
-void Gateway::operator()(Event<Start> const &) {
+void Gateway::operator()(Event<Start> const &event) {
   log::info("Starting the gateway..."sv);
+  listener_(event);
 }
 
-void Gateway::operator()(Event<Stop> const &) {
+void Gateway::operator()(Event<Stop> const &event) {
   log::info("Stopping the gateway..."sv);
+  listener_(event);
 }
 
-void Gateway::operator()(Event<Timer> const &) {
+void Gateway::operator()(Event<Timer> const &event) {
   context_.drain();
+  listener_(event);
 }
 
 void Gateway::operator()(Event<Connected> const &) {
@@ -60,6 +63,10 @@ uint16_t Gateway::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] st
 }
 
 void Gateway::operator()(metrics::Writer &) {
+}
+
+void Gateway::operator()(Trace<StreamStatus const> const &event) {
+  dispatcher_(event);
 }
 
 void Gateway::operator()(Trace<TopOfBook const> const &event, bool is_last) {

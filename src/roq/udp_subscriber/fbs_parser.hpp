@@ -18,7 +18,7 @@ struct FBSParser final : public Parser {
 
  private:
   template <typename T>
-  static void dispatch(Handler &, Event<T> const &);
+  static void dispatch(Handler &, Event<T> const &, core::udp::Frame const &);
 };
 
 }  // namespace udp_subscriber
