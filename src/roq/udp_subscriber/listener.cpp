@@ -69,17 +69,17 @@ void Listener::operator()(io::net::udp::Receiver::Error const &error) {
   log::fatal("Error: what={}"sv, error.what);
 }
 
-void Listener::operator()(Trace<Parser::Heartbeat const> const &event, core::udp::Frame const &frame) {
+void Listener::operator()(Trace<Parser::Heartbeat> const &event, core::udp::Frame const &frame) {
   update(event, frame);
 }
 
-void Listener::operator()(Trace<TopOfBook const> const &event, core::udp::Frame const &frame) {
+void Listener::operator()(Trace<TopOfBook> const &event, core::udp::Frame const &frame) {
   // log::info<3>("{}"sv, event.value);
   if (update(event, frame))
     handler_(event, true);
 }
 
-void Listener::operator()(Trace<CustomMetricsUpdate const> const &event, core::udp::Frame const &frame) {
+void Listener::operator()(Trace<CustomMetricsUpdate> const &event, core::udp::Frame const &frame) {
   // log::info<3>("{}"sv, event.value);
   if (update(event, frame)) {
     auto &[trace_info, value] = event;
@@ -96,7 +96,7 @@ void Listener::operator()(Trace<CustomMetricsUpdate const> const &event, core::u
 }
 
 template <typename T>
-bool Listener::update(Trace<T const> const &event, core::udp::Frame const &frame) {
+bool Listener::update(Trace<T> const &event, core::udp::Frame const &frame) {
   // heartbeat
   auto &trace_info = event.trace_info;
   if (!last_update_time_.count())

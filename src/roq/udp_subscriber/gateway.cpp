@@ -65,15 +65,15 @@ uint16_t Gateway::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] st
 void Gateway::operator()(metrics::Writer &) {
 }
 
-void Gateway::operator()(Trace<StreamStatus const> const &event) {
+void Gateway::operator()(Trace<StreamStatus> const &event) {
   dispatcher_(event);
 }
 
-void Gateway::operator()(Trace<TopOfBook const> const &event, bool is_last) {
+void Gateway::operator()(Trace<TopOfBook> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<CustomMetrics const> const &event, bool is_last) {
+void Gateway::operator()(Trace<CustomMetrics> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 

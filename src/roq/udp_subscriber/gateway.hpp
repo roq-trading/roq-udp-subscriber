@@ -41,9 +41,9 @@ class Gateway final : public server::Handler, public Listener::Handler {
   void operator()(metrics::Writer &) override;
 
   // many
-  void operator()(Trace<StreamStatus const> const &) override;
-  void operator()(Trace<TopOfBook const> const &, bool is_last) override;
-  void operator()(Trace<CustomMetrics const> const &, bool is_last) override;
+  void operator()(Trace<StreamStatus> const &) override;
+  void operator()(Trace<TopOfBook> const &, bool is_last) override;
+  void operator()(Trace<CustomMetrics> const &, bool is_last) override;
 
  private:
   server::Dispatcher &dispatcher_;

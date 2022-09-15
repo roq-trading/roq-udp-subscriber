@@ -20,9 +20,9 @@ namespace udp_subscriber {
 class Listener final : public io::net::udp::Receiver::Handler, public Parser::Handler {
  public:
   struct Handler {
-    virtual void operator()(Trace<StreamStatus const> const &) = 0;
-    virtual void operator()(Trace<TopOfBook const> const &, bool is_last) = 0;
-    virtual void operator()(Trace<CustomMetrics const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
+    virtual void operator()(Trace<CustomMetrics> const &, bool is_last) = 0;
   };
 
   Listener(Handler &, io::Context &, uint16_t stream_id, Shared &);
@@ -39,12 +39,12 @@ class Listener final : public io::net::udp::Receiver::Handler, public Parser::Ha
   void operator()(io::net::udp::Receiver::Error const &) override;
 
   // Parser::Handler
-  void operator()(Trace<Parser::Heartbeat const> const &, core::udp::Frame const &) override;
-  void operator()(Trace<TopOfBook const> const &, core::udp::Frame const &) override;
-  void operator()(Trace<CustomMetricsUpdate const> const &, core::udp::Frame const &) override;
+  void operator()(Trace<Parser::Heartbeat> const &, core::udp::Frame const &) override;
+  void operator()(Trace<TopOfBook> const &, core::udp::Frame const &) override;
+  void operator()(Trace<CustomMetricsUpdate> const &, core::udp::Frame const &) override;
 
   template <typename T>
-  bool update(Trace<T const> const &, core::udp::Frame const &);
+  bool update(Trace<T> const &, core::udp::Frame const &);
 
   void publish_stream_status(TraceInfo const &, ConnectionStatus);
 

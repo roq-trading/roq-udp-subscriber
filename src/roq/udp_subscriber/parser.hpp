@@ -17,9 +17,9 @@ namespace udp_subscriber {
 struct Parser {
   struct Heartbeat final {};
   struct Handler {
-    virtual void operator()(Trace<Heartbeat const> const &, core::udp::Frame const &) = 0;
-    virtual void operator()(Trace<TopOfBook const> const &, core::udp::Frame const &) = 0;
-    virtual void operator()(Trace<CustomMetricsUpdate const> const &, core::udp::Frame const &) = 0;
+    virtual void operator()(Trace<Heartbeat> const &, core::udp::Frame const &) = 0;
+    virtual void operator()(Trace<TopOfBook> const &, core::udp::Frame const &) = 0;
+    virtual void operator()(Trace<CustomMetricsUpdate> const &, core::udp::Frame const &) = 0;
   };
 
   static size_t dispatch(Handler &, std::span<std::byte const> const &buffer, TraceInfo const &, Shared &);
