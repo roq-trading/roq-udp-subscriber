@@ -23,6 +23,7 @@ void FBSParser::dispatch_helper(
   // log::debug("{}"sv, debug::hex::Message{payload});
   auto event = core::fbs::Decoder::create_event(payload);
   auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
+  log::debug("message_info={}"sv, message_info);
   shared.decoder.dispatch(
       overloaded{
           [](Event<DownloadBegin> const &) {},
@@ -32,8 +33,8 @@ void FBSParser::dispatch_helper(
           [](Event<ExternalLatency> const &) {},
           [](Event<RateLimitTrigger> const &) {},
           [](Event<GatewayStatus> const &) {},
-          [](Event<ReferenceData> const &) {},
-          [](Event<MarketStatus> const &) {},
+          [&](Event<ReferenceData> const &event) { dispatch(handler, event, frame); },
+          [&](Event<MarketStatus> const &event) { dispatch(handler, event, frame); },
           [&](Event<TopOfBook> const &event) { dispatch(handler, event, frame); },
           [](Event<MarketByPriceUpdate> const &) {},
           [](Event<MarketByOrderUpdate> const &) {},

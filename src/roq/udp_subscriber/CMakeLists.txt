@@ -8,10 +8,11 @@ set(SOURCES
     fbs_parser.cpp
     flags.cpp
     gateway.cpp
+    incremental.cpp
     json_parser.cpp
-    listener.cpp
     parser.cpp
     shared.cpp
+    snapshot.cpp
     main.cpp)
 
 add_executable("${TARGET_NAME}" ${SOURCES})

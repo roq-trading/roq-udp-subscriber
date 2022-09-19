@@ -17,15 +17,17 @@
 namespace roq {
 namespace udp_subscriber {
 
-class Listener final : public io::net::udp::Receiver::Handler, public Parser::Handler {
+class Snapshot final : public io::net::udp::Receiver::Handler, public Parser::Handler {
  public:
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
     virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
     virtual void operator()(Trace<CustomMetrics> const &, bool is_last) = 0;
   };
 
-  Listener(Handler &, io::Context &, uint16_t stream_id, Shared &);
+  Snapshot(Handler &, io::Context &, uint16_t stream_id, Shared &);
 
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
@@ -40,6 +42,8 @@ class Listener final : public io::net::udp::Receiver::Handler, public Parser::Ha
 
   // Parser::Handler
   void operator()(Trace<Parser::Heartbeat> const &, core::udp::Frame const &) override;
+  void operator()(Trace<ReferenceData> const &, core::udp::Frame const &) override;
+  void operator()(Trace<MarketStatus> const &, core::udp::Frame const &) override;
   void operator()(Trace<TopOfBook> const &, core::udp::Frame const &) override;
   void operator()(Trace<CustomMetricsUpdate> const &, core::udp::Frame const &) override;
 

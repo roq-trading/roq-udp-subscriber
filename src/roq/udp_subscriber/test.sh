@@ -4,7 +4,8 @@ NAME="subscriber"
 
 CONFIG_FILE="config/$NAME.toml"
 
-UDP_PORT=6789
+UDP_SNAPSHOT_PORT=5678
+UDP_INCREMENTAL_PORT=6789
 
 # debug?
 
@@ -32,5 +33,6 @@ $PREFIX "./roq-udp-subscriber" \
   --event_log_symlink \
   --client_listen_address "$HOME/run/$NAME.sock" \
   --metrics_listen_address "$HOME/run/${NAME}_metrics.sock" \
-  --udp_port $UDP_PORT \
+  --udp_snapshot_port $UDP_SNAPSHOT_PORT \
+  --udp_incremental_port $UDP_INCREMENTAL_PORT \
   $@

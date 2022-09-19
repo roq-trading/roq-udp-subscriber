@@ -12,22 +12,25 @@ namespace roq {
 namespace udp_subscriber {
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &, io::Context &context)
-    : dispatcher_(dispatcher), context_(context), shared_(dispatcher),
-      listener_(*this, context, ++stream_id_, shared_) {
+    : dispatcher_(dispatcher), context_(context), shared_(dispatcher), snapshot_(*this, context, ++stream_id_, shared_),
+      incremental_(*this, context, ++stream_id_, shared_) {
 }
 
 void Gateway::operator()(Event<Start> const &event) {
   log::info("Starting the gateway..."sv);
-  listener_(event);
+  snapshot_(event);
+  incremental_(event);
 }
 
 void Gateway::operator()(Event<Stop> const &event) {
   log::info("Stopping the gateway..."sv);
-  listener_(event);
+  incremental_(event);
+  snapshot_(event);
 }
 
 void Gateway::operator()(Event<Timer> const &event) {
-  listener_(event);
+  snapshot_(event);
+  incremental_(event);
 }
 
 void Gateway::operator()(Event<Connected> const &) {
@@ -68,11 +71,23 @@ void Gateway::operator()(Trace<StreamStatus> const &event) {
   dispatcher_(event);
 }
 
+void Gateway::operator()(Trace<ReferenceData> const &event, bool is_last) {
+  log::debug("{}"sv, event);
+  dispatcher_(event, is_last);
+}
+
+void Gateway::operator()(Trace<MarketStatus> const &event, bool is_last) {
+  log::debug("{}"sv, event);
+  dispatcher_(event, is_last);
+}
+
 void Gateway::operator()(Trace<TopOfBook> const &event, bool is_last) {
+  log::debug("{}"sv, event);
   dispatcher_(event, is_last);
 }
 
 void Gateway::operator()(Trace<CustomMetrics> const &event, bool is_last) {
+  log::debug("{}"sv, event);
   dispatcher_(event, is_last);
 }
 

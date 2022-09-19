@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/udp_subscriber/listener.hpp"
+#include "roq/udp_subscriber/snapshot.hpp"
 
 #include "roq/utils/update.hpp"
 
@@ -21,37 +21,37 @@ const Mask SUPPORTS{
 };
 
 auto create_receiver(auto &handler, auto &context) {
-  auto port = Flags::udp_port();
+  auto port = server::Flags::udp_snapshot_port();
   auto receiver = context.create_udp_receiver(handler, io::NetworkAddress{port});
   return receiver;
 }
 }  // namespace
 
-Listener::Listener(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
+Snapshot::Snapshot(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_(handler), stream_id_(stream_id), shared_(shared), receiver_(create_receiver(*this, context)) {
 }
 
-void Listener::operator()(Event<Start> const &) {
+void Snapshot::operator()(Event<Start> const &) {
 }
 
-void Listener::operator()(Event<Stop> const &) {
+void Snapshot::operator()(Event<Stop> const &) {
 }
 
-void Listener::operator()(Event<Timer> const &event) {
+void Snapshot::operator()(Event<Timer> const &event) {
   // log::debug("{} {}"sv, last_update_time_, event.value.now);
   if (!last_update_time_.count())
     return;
-  if ((last_update_time_ + flags::Flags::heartbeat_timeout()) < event.value.now) {
+  if ((last_update_time_ + flags::Flags::udp_heartbeat_timeout()) < event.value.now) {
     last_update_time_ = {};
     auto trace_info = server::create_trace_info();
     publish_stream_status(trace_info, ConnectionStatus::DISCONNECTED);
   }
 }
 
-void Listener::operator()(metrics::Writer &) {
+void Snapshot::operator()(metrics::Writer &) {
 }
 
-void Listener::operator()(io::net::udp::Receiver::Read const &) {
+void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
   auto trace_info = server::create_trace_info();
   while (receive_buffer_.append(*receiver_)) {
     auto message = std::data(receive_buffer_);
@@ -65,21 +65,33 @@ void Listener::operator()(io::net::udp::Receiver::Read const &) {
   }
 }
 
-void Listener::operator()(io::net::udp::Receiver::Error const &error) {
+void Snapshot::operator()(io::net::udp::Receiver::Error const &error) {
   log::fatal("Error: what={}"sv, error.what);
 }
 
-void Listener::operator()(Trace<Parser::Heartbeat> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<Parser::Heartbeat> const &event, core::udp::Frame const &frame) {
   update(event, frame);
 }
 
-void Listener::operator()(Trace<TopOfBook> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<ReferenceData> const &event, core::udp::Frame const &frame) {
   // log::info<3>("{}"sv, event.value);
   if (update(event, frame))
     handler_(event, true);
 }
 
-void Listener::operator()(Trace<CustomMetricsUpdate> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<MarketStatus> const &event, core::udp::Frame const &frame) {
+  // log::info<3>("{}"sv, event.value);
+  if (update(event, frame))
+    handler_(event, true);
+}
+
+void Snapshot::operator()(Trace<TopOfBook> const &event, core::udp::Frame const &frame) {
+  // log::info<3>("{}"sv, event.value);
+  if (update(event, frame))
+    handler_(event, true);
+}
+
+void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, core::udp::Frame const &frame) {
   // log::info<3>("{}"sv, event.value);
   if (update(event, frame)) {
     auto &[trace_info, value] = event;
@@ -96,7 +108,7 @@ void Listener::operator()(Trace<CustomMetricsUpdate> const &event, core::udp::Fr
 }
 
 template <typename T>
-bool Listener::update(Trace<T> const &event, core::udp::Frame const &frame) {
+bool Snapshot::update(Trace<T> const &event, core::udp::Frame const &frame) {
   // heartbeat
   auto &trace_info = event.trace_info;
   if (!last_update_time_.count())
@@ -122,7 +134,7 @@ bool Listener::update(Trace<T> const &event, core::udp::Frame const &frame) {
   return true;
 }
 
-void Listener::publish_stream_status(TraceInfo const &trace_info, ConnectionStatus connection_status) {
+void Snapshot::publish_stream_status(TraceInfo const &trace_info, ConnectionStatus connection_status) {
   if (!utils::update(connection_status_, connection_status))
     return;
   StreamStatus const stream_status{

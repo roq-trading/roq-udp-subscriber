@@ -25,7 +25,7 @@ int Application::main(int, char **) {
       .api = {},
       .type = server::Type::ORDER_MANAGEMENT,
   };
-  server::Trading<Gateway>(settings, config, *context).dispatch();
+  server::Router<Gateway>(settings, config, *context).dispatch();
   return EXIT_SUCCESS;
 }
 

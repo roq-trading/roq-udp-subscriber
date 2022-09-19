@@ -18,6 +18,8 @@ struct Parser {
   struct Heartbeat final {};
   struct Handler {
     virtual void operator()(Trace<Heartbeat> const &, core::udp::Frame const &) = 0;
+    virtual void operator()(Trace<ReferenceData> const &, core::udp::Frame const &) = 0;
+    virtual void operator()(Trace<MarketStatus> const &, core::udp::Frame const &) = 0;
     virtual void operator()(Trace<TopOfBook> const &, core::udp::Frame const &) = 0;
     virtual void operator()(Trace<CustomMetricsUpdate> const &, core::udp::Frame const &) = 0;
   };
