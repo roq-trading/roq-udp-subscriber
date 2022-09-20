@@ -26,7 +26,7 @@ fi
 
 # launch
 
-$PREFIX "./roq-udp-subscriber" \
+strace $PREFIX "./roq-udp-subscriber" \
   --name "$NAME" \
   --config_file "$CONFIG_FILE" \
   --event_log_dir "$HOME/var/lib/roq/data" \

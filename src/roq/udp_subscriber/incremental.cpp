@@ -2,6 +2,10 @@
 
 #include "roq/udp_subscriber/incremental.hpp"
 
+#include <arpa/inet.h>
+
+#include <string>
+
 #include "roq/utils/update.hpp"
 
 #include "roq/logging.hpp"
@@ -21,8 +25,14 @@ const Mask SUPPORTS{
 };
 
 auto create_receiver(auto &handler, auto &context) {
+  auto address = server::Flags::udp_incremental_address();
   auto port = server::Flags::udp_incremental_port();
-  auto receiver = context.create_udp_receiver(handler, io::NetworkAddress{port});
+  std::string tmp{std::empty(address) ? "127.0.0.1"sv : address};  // note! default is localhost
+  struct in_addr localhost {
+    .s_addr = inet_addr(tmp.c_str()),
+  };
+  auto network_address = io::NetworkAddress{port, localhost};
+  auto receiver = context.create_udp_receiver(handler, network_address);
   return receiver;
 }
 }  // namespace
@@ -52,6 +62,7 @@ void Incremental::operator()(metrics::Writer &) {
 }
 
 void Incremental::operator()(io::net::udp::Receiver::Read const &) {
+  log::debug("HERE"sv);
   auto trace_info = server::create_trace_info();
   while (receive_buffer_.append(*receiver_)) {
     auto message = std::data(receive_buffer_);

@@ -2,6 +2,10 @@
 
 #include "roq/udp_subscriber/snapshot.hpp"
 
+#include <arpa/inet.h>
+
+#include <string>
+
 #include "roq/utils/update.hpp"
 
 #include "roq/logging.hpp"
@@ -21,8 +25,14 @@ const Mask SUPPORTS{
 };
 
 auto create_receiver(auto &handler, auto &context) {
+  auto address = server::Flags::udp_snapshot_address();
   auto port = server::Flags::udp_snapshot_port();
-  auto receiver = context.create_udp_receiver(handler, io::NetworkAddress{port});
+  std::string tmp{std::empty(address) ? "127.0.0.1"sv : address};  // note! default is localhost
+  struct in_addr localhost {
+    .s_addr = inet_addr(tmp.c_str()),
+  };
+  auto network_address = io::NetworkAddress{port, localhost};
+  auto receiver = context.create_udp_receiver(handler, network_address);
   return receiver;
 }
 }  // namespace
