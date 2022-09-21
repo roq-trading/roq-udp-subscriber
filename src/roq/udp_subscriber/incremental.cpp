@@ -32,7 +32,10 @@ auto create_receiver(auto &handler, auto &context) {
     .s_addr = inet_addr(tmp.c_str()),
   };
   auto network_address = io::NetworkAddress{port, localhost};
-  auto receiver = context.create_udp_receiver(handler, network_address);
+  auto socket_options = Mask{
+      io::SocketOption::REUSE_ADDRESS,
+  };
+  auto receiver = context.create_udp_receiver(handler, network_address, socket_options);
   return receiver;
 }
 }  // namespace
