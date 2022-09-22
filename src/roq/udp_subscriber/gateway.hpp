@@ -42,10 +42,16 @@ class Gateway final : public server::Handler, public Snapshot::Handler, public I
   void operator()(metrics::Writer &) override;
 
   // many
+  void operator()(Trace<GatewaySettings> const &) override;
   void operator()(Trace<StreamStatus> const &) override;
+  void operator()(Trace<ExternalLatency> const &) override;
+  void operator()(Trace<GatewayStatus> const &) override;
   void operator()(Trace<ReferenceData> const &, bool is_last) override;
   void operator()(Trace<MarketStatus> const &, bool is_last) override;
   void operator()(Trace<TopOfBook> const &, bool is_last) override;
+  void operator()(Trace<MarketByPriceUpdate> const &, bool is_last) override;
+  void operator()(Trace<TradeSummary> const &, bool is_last) override;
+  void operator()(Trace<StatisticsUpdate> const &, bool is_last) override;
   void operator()(Trace<CustomMetrics> const &, bool is_last) override;
 
  private:

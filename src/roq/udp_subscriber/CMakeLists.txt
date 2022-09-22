@@ -4,6 +4,7 @@ add_subdirectory(flags)
 
 set(SOURCES
     application.cpp
+    buffer.cpp
     config.cpp
     fbs_parser.cpp
     flags.cpp
@@ -11,6 +12,7 @@ set(SOURCES
     incremental.cpp
     json_parser.cpp
     parser.cpp
+    reader.cpp
     shared.cpp
     snapshot.cpp
     main.cpp)

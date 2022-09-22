@@ -20,38 +20,37 @@ void FBSParser::dispatch_helper(
     [[maybe_unused]] TraceInfo const &,
     Shared &shared,
     core::udp::Frame const &frame) {
-  // log::debug("{}"sv, debug::hex::Message{payload});
   auto event = core::fbs::Decoder::create_event(payload);
   auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
-  log::debug("message_info={}"sv, message_info);
+  // log::debug("message_info={}"sv, message_info);
   shared.decoder.dispatch(
       overloaded{
-          [](Event<DownloadBegin> const &) {},
-          [](Event<DownloadEnd> const &) {},
-          [](Event<GatewaySettings> const &) {},
-          [](Event<StreamStatus> const &) {},
-          [](Event<ExternalLatency> const &) {},
-          [](Event<RateLimitTrigger> const &) {},
-          [](Event<GatewayStatus> const &) {},
+          [](Event<DownloadBegin> const &) {},  // drop: client specific
+          [](Event<DownloadEnd> const &) {},    // drop: client specific
+          [&](Event<GatewaySettings> const &event) { dispatch(handler, event, frame); },
+          [&](Event<StreamStatus> const &event) { dispatch(handler, event, frame); },
+          [&](Event<ExternalLatency> const &event) { dispatch(handler, event, frame); },
+          [](Event<RateLimitTrigger> const &) {},  // drop: order management
+          [&](Event<GatewayStatus> const &event) { dispatch(handler, event, frame); },
           [&](Event<ReferenceData> const &event) { dispatch(handler, event, frame); },
           [&](Event<MarketStatus> const &event) { dispatch(handler, event, frame); },
           [&](Event<TopOfBook> const &event) { dispatch(handler, event, frame); },
-          [](Event<MarketByPriceUpdate> const &) {},
-          [](Event<MarketByOrderUpdate> const &) {},
-          [](Event<TradeSummary> const &) {},
-          [](Event<StatisticsUpdate> const &) {},
-          [](Event<CreateOrder> const &) {},
-          [](Event<ModifyOrder> const &) {},
-          [](Event<CancelOrder> const &) {},
-          [](Event<CancelAllOrders> const &) {},
-          [](Event<OrderAck> const &) {},
-          [](Event<OrderUpdate> const &) {},
-          [](Event<TradeUpdate> const &) {},
-          [](Event<PositionUpdate> const &) {},
-          [](Event<FundsUpdate> const &) {},
-          [](Event<CustomMetrics> const &) {},
+          [&](Event<MarketByPriceUpdate> const &event) { dispatch(handler, event, frame); },
+          [](Event<MarketByOrderUpdate> const &) {},  // ???
+          [&](Event<TradeSummary> const &event) { dispatch(handler, event, frame); },
+          [&](Event<StatisticsUpdate> const &event) { dispatch(handler, event, frame); },
+          [](Event<CreateOrder> const &) {},      // drop: server specific
+          [](Event<ModifyOrder> const &) {},      // drop: server specific
+          [](Event<CancelOrder> const &) {},      // drop: server specific
+          [](Event<CancelAllOrders> const &) {},  // drop: server specific
+          [](Event<OrderAck> const &) {},         // drop: client specific
+          [](Event<OrderUpdate> const &) {},      // drop: client specific
+          [](Event<TradeUpdate> const &) {},      // drop: client specific
+          [](Event<PositionUpdate> const &) {},   // ???
+          [](Event<FundsUpdate> const &) {},      // ???
+          [](Event<CustomMetrics> const &) {},    // drop: internal
           [&](Event<CustomMetricsUpdate> const &event) { dispatch(handler, event, frame); },
-          [](Event<ParameterUpdate> const &) {},
+          [](Event<ParameterUpdate> const &) {},  // drop: client specific
       },
       event,
       message_info);

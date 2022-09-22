@@ -11,7 +11,9 @@
 
 #include "roq/io/net/udp/receiver.hpp"
 
+#include "roq/udp_subscriber/buffer.hpp"
 #include "roq/udp_subscriber/parser.hpp"
+#include "roq/udp_subscriber/reader.hpp"
 #include "roq/udp_subscriber/shared.hpp"
 
 namespace roq {
@@ -20,10 +22,16 @@ namespace udp_subscriber {
 class Incremental final : public io::net::udp::Receiver::Handler, public Parser::Handler {
  public:
   struct Handler {
+    virtual void operator()(Trace<GatewaySettings> const &) = 0;
     virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency> const &) = 0;
+    virtual void operator()(Trace<GatewayStatus> const &) = 0;
     virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
     virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
     virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketByPriceUpdate> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TradeSummary> const &, bool is_last) = 0;
+    virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
     virtual void operator()(Trace<CustomMetrics> const &, bool is_last) = 0;
   };
 
@@ -42,9 +50,16 @@ class Incremental final : public io::net::udp::Receiver::Handler, public Parser:
 
   // Parser::Handler
   void operator()(Trace<Parser::Heartbeat> const &, core::udp::Frame const &) override;
+  void operator()(Trace<GatewaySettings> const &, core::udp::Frame const &) override;
+  void operator()(Trace<StreamStatus> const &, core::udp::Frame const &) override;
+  void operator()(Trace<ExternalLatency> const &, core::udp::Frame const &) override;
+  void operator()(Trace<GatewayStatus> const &, core::udp::Frame const &) override;
   void operator()(Trace<ReferenceData> const &, core::udp::Frame const &) override;
   void operator()(Trace<MarketStatus> const &, core::udp::Frame const &) override;
   void operator()(Trace<TopOfBook> const &, core::udp::Frame const &) override;
+  void operator()(Trace<MarketByPriceUpdate> const &, core::udp::Frame const &) override;
+  void operator()(Trace<TradeSummary> const &, core::udp::Frame const &) override;
+  void operator()(Trace<StatisticsUpdate> const &, core::udp::Frame const &) override;
   void operator()(Trace<CustomMetricsUpdate> const &, core::udp::Frame const &) override;
 
   template <typename T>
@@ -60,13 +75,14 @@ class Incremental final : public io::net::udp::Receiver::Handler, public Parser:
   Shared &shared_;
   // io
   std::unique_ptr<io::net::udp::Receiver> receiver_;
-  io::Buffer receive_buffer_;
+  Reader reader_;
   // status
   std::chrono::nanoseconds last_update_time_ = {};
   ConnectionStatus connection_status_ = {};
   // EXPERIMENTAL
   uint32_t source_session_id_ = {};
   uint32_t source_seqno_ = {};
+  Buffer buffer_;
 };
 
 }  // namespace udp_subscriber

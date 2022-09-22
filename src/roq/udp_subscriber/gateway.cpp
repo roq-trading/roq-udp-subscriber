@@ -67,27 +67,49 @@ uint16_t Gateway::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] st
 void Gateway::operator()(metrics::Writer &) {
 }
 
+void Gateway::operator()(Trace<GatewaySettings> const &) {
+  // dispatcher_(event); // XXX FIXME no API
+}
+
 void Gateway::operator()(Trace<StreamStatus> const &event) {
+  // note! order management is not supported (reason: string_map not populated)
+  if (std::empty(event.value.account))
+    dispatcher_(event);
+}
+
+void Gateway::operator()(Trace<ExternalLatency> const &event) {
   dispatcher_(event);
 }
 
+void Gateway::operator()(Trace<GatewayStatus> const &) {
+  // dispatcher_(event); // XXX FIXME no API
+}
+
 void Gateway::operator()(Trace<ReferenceData> const &event, bool is_last) {
-  log::debug("{}"sv, event);
   dispatcher_(event, is_last);
 }
 
 void Gateway::operator()(Trace<MarketStatus> const &event, bool is_last) {
-  log::debug("{}"sv, event);
   dispatcher_(event, is_last);
 }
 
 void Gateway::operator()(Trace<TopOfBook> const &event, bool is_last) {
-  log::debug("{}"sv, event);
+  dispatcher_(event, is_last);
+}
+
+void Gateway::operator()(Trace<MarketByPriceUpdate> const &, [[maybe_unused]] bool is_last) {
+  // dispatcher_(event, is_last); // XXX FIXME
+}
+
+void Gateway::operator()(Trace<TradeSummary> const &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
+void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
 void Gateway::operator()(Trace<CustomMetrics> const &event, bool is_last) {
-  log::debug("{}"sv, event);
   dispatcher_(event, is_last);
 }
 

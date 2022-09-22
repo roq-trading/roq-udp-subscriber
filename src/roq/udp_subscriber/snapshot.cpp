@@ -51,7 +51,6 @@ void Snapshot::operator()(Event<Stop> const &) {
 }
 
 void Snapshot::operator()(Event<Timer> const &event) {
-  // log::debug("{} {}"sv, last_update_time_, event.value.now);
   if (!last_update_time_.count())
     return;
   if ((last_update_time_ + flags::Flags::udp_heartbeat_timeout()) < event.value.now) {
@@ -66,15 +65,14 @@ void Snapshot::operator()(metrics::Writer &) {
 
 void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
   auto trace_info = server::create_trace_info();
-  while (receive_buffer_.append(*receiver_)) {
-    auto message = std::data(receive_buffer_);
-    log::info<5>("received {} byte(s)"sv, std::size(message));
-    auto bytes = Parser::dispatch(*this, message, trace_info, shared_);
-    if (!bytes || bytes != std::size(message)) {
-      log::warn("{}"sv, debug::hex::Message{message});
-      log::fatal("Failed to parse message"sv);
-    }
-    receive_buffer_.clear();
+  auto parse = [&](auto &frame, auto &payload) {
+    auto bytes = Parser::dispatch(*this, frame, payload, trace_info, shared_);
+    if (bytes != std::size(payload))
+      log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
+  };
+  if (reader_.recv(*receiver_, [&](auto &frame, auto &payload) { buffer_(frame, payload, parse); })) {
+  } else {
+    log::warn("Unexpected: invalid datagram"sv);
   }
 }
 
@@ -84,6 +82,29 @@ void Snapshot::operator()(io::net::udp::Receiver::Error const &error) {
 
 void Snapshot::operator()(Trace<Parser::Heartbeat> const &event, core::udp::Frame const &frame) {
   update(event, frame);
+}
+
+void Snapshot::operator()(Trace<GatewaySettings> const &event, core::udp::Frame const &frame) {
+  // log::info<3>("{}"sv, event.value);
+  if (update(event, frame))
+    handler_(event);
+}
+
+void Snapshot::operator()(Trace<StreamStatus> const &event, core::udp::Frame const &frame) {
+  // log::info<3>("{}"sv, event.value);
+  if (update(event, frame))
+    handler_(event);
+}
+
+void Snapshot::operator()(Trace<ExternalLatency> const &, core::udp::Frame const &) {
+  // log::info<3>("{}"sv, event.value);
+  log::fatal("Unexpected"sv);
+}
+
+void Snapshot::operator()(Trace<GatewayStatus> const &event, core::udp::Frame const &frame) {
+  // log::info<3>("{}"sv, event.value);
+  if (update(event, frame))
+    handler_(event);
 }
 
 void Snapshot::operator()(Trace<ReferenceData> const &event, core::udp::Frame const &frame) {
@@ -98,7 +119,23 @@ void Snapshot::operator()(Trace<MarketStatus> const &event, core::udp::Frame con
     handler_(event, true);
 }
 
-void Snapshot::operator()(Trace<TopOfBook> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<TopOfBook> const &, core::udp::Frame const &) {
+  // log::info<3>("{}"sv, event.value);
+  log::fatal("Unexpected"sv);
+}
+
+void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, core::udp::Frame const &frame) {
+  // log::info<3>("{}"sv, event.value);
+  if (update(event, frame))
+    handler_(event, true);
+}
+
+void Snapshot::operator()(Trace<TradeSummary> const &, core::udp::Frame const &) {
+  // log::info<3>("{}"sv, event.value);
+  log::fatal("Unexpected"sv);
+}
+
+void Snapshot::operator()(Trace<StatisticsUpdate> const &event, core::udp::Frame const &frame) {
   // log::info<3>("{}"sv, event.value);
   if (update(event, frame))
     handler_(event, true);
@@ -147,9 +184,10 @@ bool Snapshot::update(Trace<T> const &event, core::udp::Frame const &frame) {
   return true;
 }
 
-void Snapshot::publish_stream_status(TraceInfo const &trace_info, ConnectionStatus connection_status) {
+void Snapshot::publish_stream_status(TraceInfo const &, ConnectionStatus connection_status) {
   if (!utils::update(connection_status_, connection_status))
     return;
+  /* XXX FIXME competing with StreamStatus from origin...???
   StreamStatus const stream_status{
       .stream_id = stream_id_,
       .account = {},
@@ -160,8 +198,8 @@ void Snapshot::publish_stream_status(TraceInfo const &trace_info, ConnectionStat
       .priority = Priority::PRIMARY,
       .connection_status = connection_status_,
   };
-  log::debug("{}"sv, stream_status);
   create_trace_and_dispatch(handler_, trace_info, stream_status);
+  */
 }
 
 }  // namespace udp_subscriber
