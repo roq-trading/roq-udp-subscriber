@@ -2,6 +2,7 @@
 
 #include "roq/udp_subscriber/buffer.hpp"
 
+#include <algorithm>
 #include <limits>
 
 #include "roq/logging.hpp"
@@ -12,89 +13,88 @@ namespace roq {
 namespace udp_subscriber {
 
 namespace {
+const constexpr size_t MAX_PAYLOAD = core::udp::MAX_PAYLOAD_LENGTH;
+const constexpr size_t MAX_BUFFER = MAX_PAYLOAD * size_t{256};
 const constexpr size_t MAX_BUFFERS = 16;
-}
+}  // namespace
 
 Buffer::Buffer() : assembly_(MAX_BUFFERS) {
 }
 
-Buffer::Status Buffer::update_helper(core::udp::Frame const &frame, std::span<std::byte const> const &payload) {
-  log::debug("frame={}, len(payload)={}"sv, frame, std::size(payload));
-  auto result = Status::UNDEFINED;
-  if (frame.source_seqno == (seqno_ + 1) && frame.fragment_number_max == 0) {  // simple
-    seqno_ = frame.source_seqno;
-    result = Status::SIMPLE;
+Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte const> const &payload) {
+  // log::debug("frame={}, len(payload)={}"sv, frame, std::size(payload));
+  auto seqno = frame.source_seqno;
+  // log::debug("seqno={}, next={}"sv, seqno, next_seqno_);
+  // reset
+  if (session_id_ != frame.source_session_id) {
+    if (session_id_)
+      log::warn("+++ SESSION RESET {} +++"sv, frame.source_session_id);
+    session_id_ = frame.source_session_id;
+    next_seqno_ = seqno;
+  }
+  if (seqno == next_seqno_ && frame.fragment_number_max == 0) {
+    advance();
+    // log::debug("next={}"sv, next_seqno_);
+    return Status::DISPATCH;
+  }
+  // fragmented or out-of-sequence
+  auto result = Status::BUFFERING;
+  auto process = [&]() -> bool {
+    return get_buffer(seqno, [&](auto &item) {
+      auto index = frame.fragment_number;
+      if (!item.available[index]) {
+        item.available.set(index);
+        auto offset = frame.fragment_number * MAX_PAYLOAD;
+        std::copy(std::begin(payload), std::end(payload), std::begin(item.payload) + offset);
+        if (index == frame.fragment_number_max)
+          item.size = offset + std::size(payload);
+        ++item.count;
+        assert(!item.ready);
+        if (item.count == (static_cast<size_t>(frame.fragment_number_max) + 1)) {  // note! +1
+          item.ready = true;
+          if (seqno == next_seqno_)
+            result = Status::READY;
+          assert(item.available.count() == item.count);  // DEBUG
+        }
+      } else {
+        log::warn("Duplicated fragment"sv);
+      }
+    });
+  };
+  if (process()) {
+    // all good
   } else {
-    if (get_buffer(frame, [&](auto &item) {  // fragmented or out of sequence
-          auto index = frame.fragment_number;
-          auto last = index == frame.fragment_number_max;
-          // log::debug("index={}, last={}"sv, index, last);
-          if (!item.available[index]) {
-            auto offset = frame.fragment_number * core::udp::MAX_PAYLOAD_LENGTH;
-            std::memcpy(std::data(item.payload) + offset, std::data(payload), std::size(payload));
-            if (last)
-              item.size = offset + std::size(payload);
-            item.available.set(index);
-            ++item.count;
-            item.ready = item.count == static_cast<size_t>(frame.fragment_number_max) + 1;  // note! +1
-            /*
-            log::debug(
-                "offset={}, availabe={}, count={}, size={}, ready={}"sv,
-                offset,
-                item.available.count(),
-                item.count,
-                item.size,
-                item.ready);
-            */
-            if (item.ready) {
-              // exclude heartbeat
-              if (!(frame.fragment_number == 0 && frame.fragment_number_max == 0 && std::empty(payload)))
-                assert(item.size);
-              assert(item.available.count() == item.count);
-            }
-          } else {
-            log::warn("Duplicated fragment"sv);
-          }
-          if (frame.source_seqno == (seqno_ + 1) && item.ready) {
-            result = Status::MULTIPLE;
-          } else {
-            result = Status::BUFFERING;
-          }
-        })) {
-    } else {
-      for (auto &item : assembly_)
+    if (distance(seqno) == MAX_BUFFERS) {
+      auto next_seqno = seqno;
+      auto ok = true;
+      for (size_t offset = 0; offset < MAX_BUFFERS; ++offset) {
+        auto seqno = next_seqno_ + (MAX_BUFFERS - offset - 1);
+        auto &item = get_item(seqno);
+        if (ok && item.ready) {
+          next_seqno = seqno;
+          continue;
+        }
+        ok = false;
         item.reset();
-      seqno_ = frame.source_seqno;
-      // XXX FIXME avoid dropping this update
-      result = Status::RESET;
+      }
+      assert(!ok);  // we shouldn't get here if there wasn't an issue
+      log::warn("+++ SEQUENCE GAP {} --> {} +++"sv, next_seqno_, next_seqno);
+      next_seqno_ = next_seqno;
+      // XXX copy + dispatch
+    } else {
+      reset();
+      log::warn("+++ SEQUENCE GAP {} --> {} +++"sv, next_seqno_, seqno);
+      next_seqno_ = seqno;
     }
+    if (process()) {
+      // all good
+    } else {
+      log::fatal("Unexpected"sv);
+    }
+    // result = Status::RESET;
   }
-  assert(result != Status::UNDEFINED);
+  // log::debug("next={}"sv, next_seqno_);
   return result;
-}
-
-std::span<std::byte const> Buffer::get_next(core::udp::Frame const &frame) {
-  if (distance(frame) == 1) {
-    auto &item = assembly_[frame.source_seqno % MAX_BUFFERS];
-    if (item.ready) {
-      assert(item.size);
-      auto result = std::span{std::data(item.payload), item.size};
-      item.reset();
-      ++seqno_;
-      return result;
-    }
-  }
-  return {};
-}
-
-template <typename Callback>
-bool Buffer::get_buffer(core::udp::Frame const &frame, Callback callback) {
-  if (distance(frame) < MAX_BUFFERS) {
-    callback(assembly_[frame.source_seqno % MAX_BUFFERS]);
-    return true;
-  } else {
-    return false;
-  }
 }
 
 namespace {
@@ -113,13 +113,43 @@ static_assert(diff<uint8_t>(0, 255) == 1);
 static_assert(diff<uint8_t>(1, 255) == 2);
 }  // namespace
 
-size_t Buffer::distance(core::udp::Frame const &frame) {
-  return diff(frame.source_seqno, seqno_);
+size_t Buffer::distance(uint32_t seqno) {
+  return diff(seqno, next_seqno_);
+}
+
+void Buffer::advance() {
+  get_buffer(next_seqno_, [&](auto &item) {
+    assert(!item.ready);
+    assert(item.count == 0);
+    assert(item.available.count() == 0);
+    assert(item.size == 0);
+  });
+  ++next_seqno_;
+}
+
+Buffer::Item &Buffer::get_item(uint32_t seqno) {
+  assert(distance(seqno) < MAX_BUFFERS);
+  return assembly_[seqno % MAX_BUFFERS];
+}
+
+template <typename Callback>
+bool Buffer::get_buffer(uint32_t seqno, Callback callback) {
+  if (distance(seqno) < MAX_BUFFERS) {
+    callback(assembly_[seqno % MAX_BUFFERS]);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void Buffer::reset() {
+  for (auto &item : assembly_)
+    item.reset();
 }
 
 // Item
 
-Buffer::Item::Item() : payload(core::udp::MAX_PAYLOAD_LENGTH * 256) {
+Buffer::Item::Item() : payload(MAX_BUFFER) {
 }
 
 void Buffer::Item::reset() {
