@@ -161,29 +161,12 @@ void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, core::udp:
 }
 
 template <typename T>
-bool Incremental::update(Trace<T> const &event, core::udp::Frame const &frame) {
+bool Incremental::update(Trace<T> const &event, core::udp::Frame const &) {
   // heartbeat
   auto &trace_info = event.trace_info;
   if (!last_update_time_.count())
     publish_stream_status(trace_info, ConnectionStatus::READY);
   last_update_time_ = trace_info.source_receive_time;
-  // sequence number
-  if (frame.source_session_id != source_session_id_) {
-    log::warn<3>("+++ RESET SEQNO={} +++"sv, frame.source_seqno);
-    source_session_id_ = frame.source_session_id;
-    source_seqno_ = frame.source_seqno;
-  } else {
-    const constexpr auto HALF = uint32_t{1} >> 31;
-    if (source_seqno_ > HALF && frame.source_seqno < HALF) {
-      log::info("+++ WRAP-AROUND SEQNO={} +++"sv, frame.source_seqno);
-      source_seqno_ = frame.source_seqno;
-    } else if (source_seqno_ < frame.source_seqno) {
-      source_seqno_ = frame.source_seqno;
-    } else {
-      log::warn<3>("*** DROP SEQNO={} ***"sv, frame.source_seqno);
-      return false;  // drop
-    }
-  }
   return true;
 }
 

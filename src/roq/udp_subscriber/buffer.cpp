@@ -23,16 +23,16 @@ Buffer::Buffer() : assembly_(MAX_BUFFERS) {
 
 Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte const> const &payload) {
   // log::debug("frame={}, len(payload)={}"sv, frame, std::size(payload));
-  auto seqno = frame.source_seqno;
+  auto seqno = frame.seqno;
   // log::debug("seqno={}, next={}"sv, seqno, next_seqno_);
   // reset
-  if (session_id_ != frame.source_session_id) {
+  if (session_id_ != frame.session_id) {
     if (session_id_)
-      log::warn("+++ SESSION RESET {} +++"sv, frame.source_session_id);
-    session_id_ = frame.source_session_id;
+      log::warn("+++ SESSION RESET {} +++"sv, frame.session_id);
+    session_id_ = frame.session_id;
     next_seqno_ = seqno;
   }
-  if (seqno == next_seqno_ && frame.fragment_number_max == 0) {
+  if (seqno == next_seqno_ && frame.fragment_max == 0) {
     advance();
     // log::debug("next={}"sv, next_seqno_);
     return Status::DISPATCH;
@@ -41,16 +41,16 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
   auto result = Status::BUFFERING;
   auto process = [&]() -> bool {
     return get_buffer(seqno, [&](auto &item) {
-      auto index = frame.fragment_number;
+      auto index = frame.fragment;
       if (!item.available[index]) {
         item.available.set(index);
-        auto offset = frame.fragment_number * MAX_PAYLOAD;
+        auto offset = frame.fragment * MAX_PAYLOAD;
         std::copy(std::begin(payload), std::end(payload), std::begin(item.payload) + offset);
-        if (index == frame.fragment_number_max)
+        if (index == frame.fragment_max)
           item.size = offset + std::size(payload);
         ++item.count;
         assert(!item.ready);
-        if (item.count == (static_cast<size_t>(frame.fragment_number_max) + 1)) {  // note! +1
+        if (item.count == (static_cast<size_t>(frame.fragment_max) + 1)) {  // note! +1
           item.ready = true;
           if (seqno == next_seqno_)
             result = Status::READY;

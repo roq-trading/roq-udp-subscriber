@@ -5,7 +5,6 @@
 #include "roq/logging.hpp"
 
 #include "roq/udp_subscriber/fbs_parser.hpp"
-#include "roq/udp_subscriber/json_parser.hpp"
 
 using namespace std::literals;
 
@@ -19,6 +18,7 @@ size_t Parser::dispatch(
     TraceInfo const &trace_info,
     Shared &shared) {
   if (!std::empty(payload)) {
+    auto ok = false;
     switch (frame.encoding) {
       using enum core::udp::Encoding;
       case UNDEFINED:
@@ -27,11 +27,11 @@ size_t Parser::dispatch(
         break;
       case FLATBUFFERS:
         FBSParser::dispatch_helper(handler, payload, trace_info, shared, frame);
-        break;
-      case JSON:
-        JSONParser::dispatch_helper(handler, payload, trace_info, shared, frame);
+        ok = true;
         break;
     }
+    if (!ok)
+      log::warn("Unexpected: frame={}"sv, frame);
   } else {
     Heartbeat const heartbeat{};
     create_trace_and_dispatch(handler, trace_info, heartbeat, frame);

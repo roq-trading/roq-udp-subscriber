@@ -76,13 +76,10 @@ class Incremental final : public io::net::udp::Receiver::Handler, public Parser:
   // io
   std::unique_ptr<io::net::udp::Receiver> receiver_;
   Reader reader_;
+  Buffer buffer_;
   // status
   std::chrono::nanoseconds last_update_time_ = {};
   ConnectionStatus connection_status_ = {};
-  // EXPERIMENTAL
-  uint32_t source_session_id_ = {};
-  uint32_t source_seqno_ = {};
-  Buffer buffer_;
 };
 
 }  // namespace udp_subscriber

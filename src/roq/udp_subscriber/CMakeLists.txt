@@ -10,7 +10,6 @@ set(SOURCES
     flags.cpp
     gateway.cpp
     incremental.cpp
-    json_parser.cpp
     parser.cpp
     reader.cpp
     shared.cpp
