@@ -9,17 +9,21 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
-Reader::Reader() : buffer_(4096) {
+// === CONSTANTS ===
+
+namespace {
+const size_t BUFFER_LENGTH = 4096;
+}
+
+// === IMPLEMENTATION ===
+
+Reader::Reader() : buffer_(BUFFER_LENGTH) {
 }
 
 bool Reader::validate(std::span<std::byte const> const &message) {
   using Frame = core::udp::Frame;
   if (std::size(message) < sizeof(Frame)) {
     log::warn("Unexpected: len(data)={} < len(frame)={}"sv, std::size(message), sizeof(Frame));
-    return false;
-  }
-  if (message[0] != core::udp::MAGIC) {
-    log::warn(R"(Unexpected: magic=\x{:02x} != \x{:02x})"sv, message[0], core::udp::MAGIC);
     return false;
   }
   return true;

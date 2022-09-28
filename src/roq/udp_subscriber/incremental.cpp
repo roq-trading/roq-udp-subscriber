@@ -65,12 +65,16 @@ void Incremental::operator()(metrics::Writer &) {
 
 void Incremental::operator()(io::net::udp::Receiver::Read const &) {
   auto trace_info = server::create_trace_info();
-  auto parse = [&](auto &frame, auto &payload) {
-    auto bytes = Parser::dispatch(*this, frame, payload, trace_info, shared_);
+  auto parse = [&](auto &header, auto &payload) {
+    log::debug("header={}, len(payload)={}"sv, header, std::size(payload));
+    auto bytes = Parser::dispatch(*this, header, payload, trace_info, shared_);
     if (bytes != std::size(payload))
       log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
   };
-  if (reader_.recv(*receiver_, [&](auto &frame, auto &payload) { buffer_(frame, payload, parse); })) {
+  if (reader_.recv(*receiver_, [&](auto &frame, auto &payload) {
+        log::debug("frame={}, len(payload)={}"sv, frame, std::size(payload));
+        buffer_(frame, payload, parse);
+      })) {
   } else {
     log::warn("Unexpected: invalid datagram"sv);
   }
@@ -80,73 +84,73 @@ void Incremental::operator()(io::net::udp::Receiver::Error const &error) {
   log::fatal("Error: what={}"sv, error.what);
 }
 
-void Incremental::operator()(Trace<Parser::Heartbeat> const &event, core::udp::Frame const &frame) {
-  update(event, frame);
+void Incremental::operator()(Trace<Parser::Heartbeat> const &event, Header const &header) {
+  update(event, header);
 }
 
-void Incremental::operator()(Trace<GatewaySettings> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<GatewaySettings> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event);
 }
 
-void Incremental::operator()(Trace<StreamStatus> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<StreamStatus> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event);
 }
 
-void Incremental::operator()(Trace<ExternalLatency> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<ExternalLatency> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event);
 }
 
-void Incremental::operator()(Trace<GatewayStatus> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<GatewayStatus> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event);
 }
 
-void Incremental::operator()(Trace<ReferenceData> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<ReferenceData> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<MarketStatus> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<MarketStatus> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<TopOfBook> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<TopOfBook> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, core::udp::Frame const &frame) {
-  log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, Header const &header) {
+  // log::info<3>("{}"sv, event.value);
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<TradeSummary> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<TradeSummary> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<StatisticsUpdate> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<StatisticsUpdate> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, core::udp::Frame const &frame) {
+void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame)) {
+  if (update(event, header)) {
     auto &[trace_info, value] = event;
     CustomMetrics const custom_metrics{
         .label = value.label,
@@ -161,7 +165,7 @@ void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, core::udp:
 }
 
 template <typename T>
-bool Incremental::update(Trace<T> const &event, core::udp::Frame const &) {
+bool Incremental::update(Trace<T> const &event, Header const &) {
   // heartbeat
   auto &trace_info = event.trace_info;
   if (!last_update_time_.count())

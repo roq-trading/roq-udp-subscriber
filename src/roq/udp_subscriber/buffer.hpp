@@ -7,6 +7,8 @@
 
 #include "roq/core/udp/frame.hpp"
 
+#include "roq/udp_subscriber/header.hpp"
+
 namespace roq {
 namespace udp_subscriber {
 
@@ -26,16 +28,33 @@ struct Buffer final {
       using enum Status;
       case BUFFERING:
         break;
-      case DISPATCH:
-        callback(frame, payload);  // XXX frame.source_seqno
-        [[fallthrough]];           // note!
+      case DISPATCH: {
+        Header header{
+            .session_id = frame.session_id,
+            .seqno = frame.seqno,
+            .last_seqno = frame.last_seqno,
+            .object_type = frame.object_type,
+            .object_id = frame.object_id,
+            .encoding = frame.encoding,
+        };
+        callback(header, payload);
+        [[fallthrough]];  // note! possible re-ordering
+      }
       case READY:
         while (true) {
           auto &item = get_item(next_seqno_);
           if (!item.ready)
             break;
+          Header header{
+              .session_id = session_id_,
+              .seqno = next_seqno_,
+              .last_seqno = item.last_seqno,
+              .object_type = item.object_type,
+              .object_id = item.object_id,
+              .encoding = item.encoding,
+          };
           auto payload = std::span{std::data(item.payload), item.size};
-          callback(frame, payload);  // XXX next_seqno_
+          callback(header, payload);
           item.reset();
           advance();
         }
@@ -59,6 +78,11 @@ struct Buffer final {
     std::bitset<256> available;
     std::vector<std::byte> payload;
     size_t size = {};
+    //
+    uint32_t last_seqno = {};
+    uint8_t object_type = {};
+    uint16_t object_id = {};
+    core::udp::Encoding encoding = {};
   };
 
   Item &get_item(uint32_t seqno);
@@ -69,7 +93,7 @@ struct Buffer final {
   void reset();
 
  private:
-  uint32_t session_id_ = {};
+  uint16_t session_id_ = {};
   uint32_t next_seqno_ = {};
   std::vector<Item> assembly_;
 };

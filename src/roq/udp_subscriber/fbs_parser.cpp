@@ -19,7 +19,7 @@ void FBSParser::dispatch_helper(
     std::span<std::byte const> const &payload,
     [[maybe_unused]] TraceInfo const &,
     Shared &shared,
-    core::udp::Frame const &frame) {
+    Header const &header) {
   auto event = core::fbs::Decoder::create_event(payload);
   auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
   // log::debug("message_info={}"sv, message_info);
@@ -27,18 +27,18 @@ void FBSParser::dispatch_helper(
       overloaded{
           [](Event<DownloadBegin> const &) {},  // drop: client specific
           [](Event<DownloadEnd> const &) {},    // drop: client specific
-          [&](Event<GatewaySettings> const &event) { dispatch(handler, event, frame); },
-          [&](Event<StreamStatus> const &event) { dispatch(handler, event, frame); },
-          [&](Event<ExternalLatency> const &event) { dispatch(handler, event, frame); },
+          [&](Event<GatewaySettings> const &event) { dispatch(handler, event, header); },
+          [&](Event<StreamStatus> const &event) { dispatch(handler, event, header); },
+          [&](Event<ExternalLatency> const &event) { dispatch(handler, event, header); },
           [](Event<RateLimitTrigger> const &) {},  // drop: order management
-          [&](Event<GatewayStatus> const &event) { dispatch(handler, event, frame); },
-          [&](Event<ReferenceData> const &event) { dispatch(handler, event, frame); },
-          [&](Event<MarketStatus> const &event) { dispatch(handler, event, frame); },
-          [&](Event<TopOfBook> const &event) { dispatch(handler, event, frame); },
-          [&](Event<MarketByPriceUpdate> const &event) { dispatch(handler, event, frame); },
+          [&](Event<GatewayStatus> const &event) { dispatch(handler, event, header); },
+          [&](Event<ReferenceData> const &event) { dispatch(handler, event, header); },
+          [&](Event<MarketStatus> const &event) { dispatch(handler, event, header); },
+          [&](Event<TopOfBook> const &event) { dispatch(handler, event, header); },
+          [&](Event<MarketByPriceUpdate> const &event) { dispatch(handler, event, header); },
           [](Event<MarketByOrderUpdate> const &) {},  // ???
-          [&](Event<TradeSummary> const &event) { dispatch(handler, event, frame); },
-          [&](Event<StatisticsUpdate> const &event) { dispatch(handler, event, frame); },
+          [&](Event<TradeSummary> const &event) { dispatch(handler, event, header); },
+          [&](Event<StatisticsUpdate> const &event) { dispatch(handler, event, header); },
           [](Event<CreateOrder> const &) {},      // drop: server specific
           [](Event<ModifyOrder> const &) {},      // drop: server specific
           [](Event<CancelOrder> const &) {},      // drop: server specific
@@ -49,7 +49,7 @@ void FBSParser::dispatch_helper(
           [](Event<PositionUpdate> const &) {},   // ???
           [](Event<FundsUpdate> const &) {},      // ???
           [](Event<CustomMetrics> const &) {},    // drop: internal
-          [&](Event<CustomMetricsUpdate> const &event) { dispatch(handler, event, frame); },
+          [&](Event<CustomMetricsUpdate> const &event) { dispatch(handler, event, header); },
           [](Event<ParameterUpdate> const &) {},  // drop: client specific
       },
       event,
@@ -57,7 +57,7 @@ void FBSParser::dispatch_helper(
 }
 
 template <typename T>
-void FBSParser::dispatch(Handler &handler, Event<T> const &event, core::udp::Frame const &frame) {
+void FBSParser::dispatch(Handler &handler, Event<T> const &event, Header const &header) {
   auto &[message_info, value] = event;
   auto now = core::clock::GetSystem();
   TraceInfo trace_info{
@@ -66,7 +66,7 @@ void FBSParser::dispatch(Handler &handler, Event<T> const &event, core::udp::Fra
       .origin_create_time_utc = message_info.origin_create_time_utc,
   };
   Trace trace{trace_info, value};
-  handler(trace, frame);
+  handler(trace, header);
 }
 
 }  // namespace udp_subscriber

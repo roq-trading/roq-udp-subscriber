@@ -13,28 +13,28 @@ namespace udp_subscriber {
 
 size_t Parser::dispatch(
     Handler &handler,
-    core::udp::Frame const &frame,
+    Header const &header,
     std::span<std::byte const> const &payload,
     TraceInfo const &trace_info,
     Shared &shared) {
   if (!std::empty(payload)) {
     auto ok = false;
-    switch (frame.encoding) {
+    switch (header.encoding) {
       using enum core::udp::Encoding;
       case UNDEFINED:
         break;
       case NATIVE:
         break;
       case FLATBUFFERS:
-        FBSParser::dispatch_helper(handler, payload, trace_info, shared, frame);
+        FBSParser::dispatch_helper(handler, payload, trace_info, shared, header);
         ok = true;
         break;
     }
     if (!ok)
-      log::warn("Unexpected: frame={}"sv, frame);
+      log::warn("Unexpected: header={}"sv, header);
   } else {
     Heartbeat const heartbeat{};
-    create_trace_and_dispatch(handler, trace_info, heartbeat, frame);
+    create_trace_and_dispatch(handler, trace_info, heartbeat, header);
   }
   return std::size(payload);
 }

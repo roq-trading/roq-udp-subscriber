@@ -65,12 +65,16 @@ void Snapshot::operator()(metrics::Writer &) {
 
 void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
   auto trace_info = server::create_trace_info();
-  auto parse = [&](auto &frame, auto &payload) {
-    auto bytes = Parser::dispatch(*this, frame, payload, trace_info, shared_);
+  auto parse = [&](auto &header, auto &payload) {
+    log::debug("header={}, len(payload)={}"sv, header, std::size(payload));
+    auto bytes = Parser::dispatch(*this, header, payload, trace_info, shared_);
     if (bytes != std::size(payload))
       log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
   };
-  if (reader_.recv(*receiver_, [&](auto &frame, auto &payload) { buffer_(frame, payload, parse); })) {
+  if (reader_.recv(*receiver_, [&](auto &frame, auto &payload) {
+        log::debug("frame={}, len(payload)={}"sv, frame, std::size(payload));
+        buffer_(frame, payload, parse);
+      })) {
   } else {
     log::warn("Unexpected: invalid datagram"sv);
   }
@@ -80,70 +84,70 @@ void Snapshot::operator()(io::net::udp::Receiver::Error const &error) {
   log::fatal("Error: what={}"sv, error.what);
 }
 
-void Snapshot::operator()(Trace<Parser::Heartbeat> const &event, core::udp::Frame const &frame) {
-  update(event, frame);
+void Snapshot::operator()(Trace<Parser::Heartbeat> const &event, Header const &header) {
+  update(event, header);
 }
 
-void Snapshot::operator()(Trace<GatewaySettings> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<GatewaySettings> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event);
 }
 
-void Snapshot::operator()(Trace<StreamStatus> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<StreamStatus> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event);
 }
 
-void Snapshot::operator()(Trace<ExternalLatency> const &, core::udp::Frame const &) {
+void Snapshot::operator()(Trace<ExternalLatency> const &, Header const &) {
   // log::info<3>("{}"sv, event.value);
   log::fatal("Unexpected"sv);
 }
 
-void Snapshot::operator()(Trace<GatewayStatus> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<GatewayStatus> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event);
 }
 
-void Snapshot::operator()(Trace<ReferenceData> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<ReferenceData> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Snapshot::operator()(Trace<MarketStatus> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<MarketStatus> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Snapshot::operator()(Trace<TopOfBook> const &, core::udp::Frame const &) {
+void Snapshot::operator()(Trace<TopOfBook> const &, Header const &) {
   // log::info<3>("{}"sv, event.value);
   log::fatal("Unexpected"sv);
 }
 
-void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Snapshot::operator()(Trace<TradeSummary> const &, core::udp::Frame const &) {
+void Snapshot::operator()(Trace<TradeSummary> const &, Header const &) {
   // log::info<3>("{}"sv, event.value);
   log::fatal("Unexpected"sv);
 }
 
-void Snapshot::operator()(Trace<StatisticsUpdate> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<StatisticsUpdate> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame))
+  if (update(event, header))
     handler_(event, true);
 }
 
-void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, core::udp::Frame const &frame) {
+void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, Header const &header) {
   // log::info<3>("{}"sv, event.value);
-  if (update(event, frame)) {
+  if (update(event, header)) {
     auto &[trace_info, value] = event;
     CustomMetrics const custom_metrics{
         .label = value.label,
@@ -158,7 +162,7 @@ void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, core::udp::Fr
 }
 
 template <typename T>
-bool Snapshot::update(Trace<T> const &event, core::udp::Frame const &) {
+bool Snapshot::update(Trace<T> const &event, Header const &) {
   // heartbeat
   auto &trace_info = event.trace_info;
   if (!last_update_time_.count())

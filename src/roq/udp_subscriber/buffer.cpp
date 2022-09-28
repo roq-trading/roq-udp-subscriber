@@ -54,7 +54,12 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
           item.ready = true;
           if (seqno == next_seqno_)
             result = Status::READY;
-          assert(item.available.count() == item.count);  // DEBUG
+          assert(item.available.count() == item.count);
+          //
+          item.last_seqno = frame.last_seqno;
+          item.object_type = frame.object_type;
+          item.object_id = frame.object_id;
+          item.encoding = frame.encoding;
         }
       } else {
         log::warn("Duplicated fragment"sv);

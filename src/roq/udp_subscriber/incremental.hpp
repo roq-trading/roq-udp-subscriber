@@ -49,21 +49,21 @@ class Incremental final : public io::net::udp::Receiver::Handler, public Parser:
   void operator()(io::net::udp::Receiver::Error const &) override;
 
   // Parser::Handler
-  void operator()(Trace<Parser::Heartbeat> const &, core::udp::Frame const &) override;
-  void operator()(Trace<GatewaySettings> const &, core::udp::Frame const &) override;
-  void operator()(Trace<StreamStatus> const &, core::udp::Frame const &) override;
-  void operator()(Trace<ExternalLatency> const &, core::udp::Frame const &) override;
-  void operator()(Trace<GatewayStatus> const &, core::udp::Frame const &) override;
-  void operator()(Trace<ReferenceData> const &, core::udp::Frame const &) override;
-  void operator()(Trace<MarketStatus> const &, core::udp::Frame const &) override;
-  void operator()(Trace<TopOfBook> const &, core::udp::Frame const &) override;
-  void operator()(Trace<MarketByPriceUpdate> const &, core::udp::Frame const &) override;
-  void operator()(Trace<TradeSummary> const &, core::udp::Frame const &) override;
-  void operator()(Trace<StatisticsUpdate> const &, core::udp::Frame const &) override;
-  void operator()(Trace<CustomMetricsUpdate> const &, core::udp::Frame const &) override;
+  void operator()(Trace<Parser::Heartbeat> const &, Header const &) override;
+  void operator()(Trace<GatewaySettings> const &, Header const &) override;
+  void operator()(Trace<StreamStatus> const &, Header const &) override;
+  void operator()(Trace<ExternalLatency> const &, Header const &) override;
+  void operator()(Trace<GatewayStatus> const &, Header const &) override;
+  void operator()(Trace<ReferenceData> const &, Header const &) override;
+  void operator()(Trace<MarketStatus> const &, Header const &) override;
+  void operator()(Trace<TopOfBook> const &, Header const &) override;
+  void operator()(Trace<MarketByPriceUpdate> const &, Header const &) override;
+  void operator()(Trace<TradeSummary> const &, Header const &) override;
+  void operator()(Trace<StatisticsUpdate> const &, Header const &) override;
+  void operator()(Trace<CustomMetricsUpdate> const &, Header const &) override;
 
   template <typename T>
-  bool update(Trace<T> const &, core::udp::Frame const &);
+  bool update(Trace<T> const &, Header const &);
 
   void publish_stream_status(TraceInfo const &, ConnectionStatus);
 
