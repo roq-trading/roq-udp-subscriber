@@ -66,13 +66,44 @@ void Snapshot::operator()(metrics::Writer &) {
 void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
   auto trace_info = server::create_trace_info();
   auto parse = [&](auto &header, auto &payload) {
-    log::debug("header={}, len(payload)={}"sv, header, std::size(payload));
-    auto bytes = Parser::dispatch(*this, header, payload, trace_info, shared_);
-    if (bytes != std::size(payload))
-      log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
+    log::info<5>("header={}, len(payload)={}"sv, header, std::size(payload));
+    // note! different session id drops
+    if (header.session_id != shared_.session_id)
+      return;
+    auto &state = shared_.state[{header.object_type, header.object_id}];
+    auto include = [&header, &state]() {
+      if (header.object_type == 0x0)  // always
+        return true;
+      if (state.ready) {
+        return false;
+      } else {
+        if (state.last_seqno.has_value()) {
+          if ((*state.last_seqno) <= header.last_seqno) {  // note! we last_seqno from incremental channel
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return true;
+        }
+      }
+    }();
+    if (include) {
+      state.last_seqno = header.last_seqno;  // note! last_seqno from incremental channel
+      if (header.object_type != 0x0)
+        log::info<4>(
+            R"(+++ OBJECT READY +++ (object_type=\x{:02x}, object_id=\x{:04x}, last_seqno={}))"sv,
+            header.object_type,
+            header.object_id,
+            *state.last_seqno);
+      // parse
+      auto bytes = Parser::dispatch(*this, header, payload, trace_info, shared_);
+      if (bytes != std::size(payload))
+        log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
+    }
   };
   if (reader_.recv(*receiver_, [&](auto &frame, auto &payload) {
-        log::debug("frame={}, len(payload)={}"sv, frame, std::size(payload));
+        log::info<5>("frame={}, len(payload)={}"sv, frame, std::size(payload));
         buffer_(frame, payload, parse);
       })) {
   } else {

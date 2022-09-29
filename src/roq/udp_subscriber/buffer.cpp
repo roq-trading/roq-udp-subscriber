@@ -28,7 +28,7 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
   // reset
   if (session_id_ != frame.session_id) {
     if (session_id_)
-      log::warn("+++ SESSION RESET {} +++"sv, frame.session_id);
+      log::warn(R"(+++ SESSION RESET \x{:04x} +++)"sv, frame.session_id);
     session_id_ = frame.session_id;
     next_seqno_ = seqno;
   }
@@ -59,7 +59,8 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
           item.last_seqno = frame.last_seqno;
           item.object_type = frame.object_type;
           item.object_id = frame.object_id;
-          item.encoding = frame.encoding;
+          item.encoding = core::udp::encoding_from_control(frame.control);
+          item.snapshot = core::udp::snapshot_from_control(frame.control);
         }
       } else {
         log::warn("Duplicated fragment"sv);

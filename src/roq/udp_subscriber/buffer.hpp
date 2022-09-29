@@ -35,7 +35,8 @@ struct Buffer final {
             .last_seqno = frame.last_seqno,
             .object_type = frame.object_type,
             .object_id = frame.object_id,
-            .encoding = frame.encoding,
+            .encoding = core::udp::encoding_from_control(frame.control),
+            .snapshot = core::udp::snapshot_from_control(frame.control),
         };
         callback(header, payload);
         [[fallthrough]];  // note! possible re-ordering
@@ -52,6 +53,7 @@ struct Buffer final {
               .object_type = item.object_type,
               .object_id = item.object_id,
               .encoding = item.encoding,
+              .snapshot = item.snapshot,
           };
           auto payload = std::span{std::data(item.payload), item.size};
           callback(header, payload);
@@ -83,6 +85,7 @@ struct Buffer final {
     uint8_t object_type = {};
     uint16_t object_id = {};
     core::udp::Encoding encoding = {};
+    bool snapshot = {};
   };
 
   Item &get_item(uint32_t seqno);

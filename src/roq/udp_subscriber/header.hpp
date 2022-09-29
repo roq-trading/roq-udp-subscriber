@@ -14,6 +14,7 @@ struct Header final {
   uint8_t object_type = {};
   uint16_t object_id = {};
   core::udp::Encoding encoding = {};
+  bool snapshot = {};
 };
 
 }  // namespace udp_subscriber
@@ -36,13 +37,15 @@ struct fmt::formatter<roq::udp_subscriber::Header> {
         R"(last_seqno={}, )"
         R"(object_type=\x{:02x}, )"
         R"(object_id=\x{:04x}, )"
-        R"(encoding={})"
+        R"(encoding={}, )"
+        R"(snapshot={})"
         R"(}})"sv,
         value.session_id,
         value.seqno,
         value.last_seqno,
         value.object_type,
         value.object_id,
-        magic_enum::enum_name(value.encoding));
+        magic_enum::enum_name(value.encoding),
+        value.snapshot);
   }
 };
