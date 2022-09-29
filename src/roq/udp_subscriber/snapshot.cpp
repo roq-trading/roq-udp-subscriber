@@ -84,12 +84,12 @@ void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
             return false;
           }
         } else {
-          return true;
+          return true;  // always release when the object is not ready and we're not waiting
         }
       }
     }();
     if (include) {
-      state.last_seqno = header.last_seqno;  // note! last_seqno from incremental channel
+      state.last_seqno = header.last_seqno;  // note! last_seqno is from the incremental channel
       if (header.object_type != 0x0)
         log::info<4>(
             R"(+++ OBJECT READY +++ (object_type=\x{:02x}, object_id=\x{:04x}, last_seqno={}))"sv,
