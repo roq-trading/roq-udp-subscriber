@@ -97,10 +97,6 @@ void Gateway::operator()(Trace<TopOfBook> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<MarketByPriceUpdate> const &, [[maybe_unused]] bool is_last) {
-  // dispatcher_(event, is_last); // XXX FIXME
-}
-
 void Gateway::operator()(Trace<TradeSummary> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }

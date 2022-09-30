@@ -19,11 +19,17 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
+// === CONSTANTS ===
+
 namespace {
 const Mask SUPPORTS{
     SupportType::TOP_OF_BOOK,
 };
+}
 
+// === HELPERS ===
+
+namespace {
 auto create_receiver(auto &handler, auto &context) {
   auto address = server::Flags::udp_snapshot_address();
   auto port = server::Flags::udp_snapshot_port();
@@ -39,6 +45,8 @@ auto create_receiver(auto &handler, auto &context) {
   return receiver;
 }
 }  // namespace
+
+// === IMPLEMENTATION ===
 
 Snapshot::Snapshot(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_(handler), stream_id_(stream_id), shared_(shared), receiver_(create_receiver(*this, context)) {
@@ -90,12 +98,13 @@ void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
     }();
     if (include) {
       state.last_seqno = header.last_seqno;  // note! last_seqno is from the incremental channel
-      if (header.object_type != 0x0)
+      if (header.object_type != 0x0) {
         log::info<4>(
             R"(+++ OBJECT READY +++ (object_type=\x{:02x}, object_id=\x{:04x}, last_seqno={}))"sv,
             header.object_type,
             header.object_id,
             *state.last_seqno);
+      }
       // parse
       auto bytes = Parser::dispatch(*this, header, payload, trace_info, shared_);
       if (bytes != std::size(payload))
@@ -120,64 +129,90 @@ void Snapshot::operator()(Trace<Parser::Heartbeat> const &event, Header const &h
 }
 
 void Snapshot::operator()(Trace<GatewaySettings> const &event, Header const &header) {
-  // log::info<3>("{}"sv, event.value);
   if (update(event, header))
     handler_(event);
 }
 
 void Snapshot::operator()(Trace<StreamStatus> const &event, Header const &header) {
-  // log::info<3>("{}"sv, event.value);
   if (update(event, header))
     handler_(event);
 }
 
 void Snapshot::operator()(Trace<ExternalLatency> const &, Header const &) {
-  // log::info<3>("{}"sv, event.value);
   log::fatal("Unexpected"sv);
 }
 
 void Snapshot::operator()(Trace<GatewayStatus> const &event, Header const &header) {
-  // log::info<3>("{}"sv, event.value);
   if (update(event, header))
     handler_(event);
 }
 
 void Snapshot::operator()(Trace<ReferenceData> const &event, Header const &header) {
-  // log::info<3>("{}"sv, event.value);
   if (update(event, header))
     handler_(event, true);
 }
 
 void Snapshot::operator()(Trace<MarketStatus> const &event, Header const &header) {
-  // log::info<3>("{}"sv, event.value);
   if (update(event, header))
     handler_(event, true);
 }
 
 void Snapshot::operator()(Trace<TopOfBook> const &, Header const &) {
-  // log::info<3>("{}"sv, event.value);
   log::fatal("Unexpected"sv);
 }
 
 void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, Header const &header) {
-  // log::info<3>("{}"sv, event.value);
-  if (update(event, header))
-    handler_(event, true);
+  if (update(event, header)) {
+    auto &trace_info = event.trace_info;
+    auto &market_by_price_update = event.value;
+    auto symbol = market_by_price_update.symbol;
+    auto &collector = shared_.mbp_collector[symbol];
+    try {
+      auto publish_snapshot = [&](auto &bids, auto &asks, auto sequence) {
+        log::debug(R"(PUBLISH SNAPSHOT symbol="{}", sequence={})"sv, symbol, sequence);
+        MarketByPriceUpdate market_by_price_update_2{
+            .stream_id = stream_id_,
+            .exchange = Flags::exchange(),
+            .symbol = symbol,
+            .bids = bids,
+            .asks = asks,
+            .update_type = UpdateType::SNAPSHOT,
+            .exchange_time_utc = {},
+            .exchange_sequence = collector.last_sequence(),
+            .price_decimals = {},
+            .quantity_decimals = {},
+            .checksum = {},
+        };
+        Trace event(trace_info, market_by_price_update_2);
+        shared_(event, true, [&](auto &market_by_price) { collector.apply(market_by_price, sequence, false); });
+      };
+      auto request_snapshot = [&](auto retries) {
+        // XXX ???
+      };
+      collector(
+          market_by_price_update.bids,
+          market_by_price_update.asks,
+          header.last_seqno,  // note! last_seqno correlates with incremental
+          publish_snapshot,
+          request_snapshot);
+    } catch (BadState &) {
+      log::warn(R"(RESUBSCRIBE symbol="{}")"sv, symbol);
+      collector.clear();
+      // XXX ???
+    }
+  }
 }
 
 void Snapshot::operator()(Trace<TradeSummary> const &, Header const &) {
-  // log::info<3>("{}"sv, event.value);
   log::fatal("Unexpected"sv);
 }
 
 void Snapshot::operator()(Trace<StatisticsUpdate> const &event, Header const &header) {
-  // log::info<3>("{}"sv, event.value);
   if (update(event, header))
     handler_(event, true);
 }
 
 void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, Header const &header) {
-  // log::info<3>("{}"sv, event.value);
   if (update(event, header)) {
     auto &[trace_info, value] = event;
     CustomMetrics const custom_metrics{

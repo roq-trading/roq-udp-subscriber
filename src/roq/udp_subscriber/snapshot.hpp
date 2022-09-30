@@ -26,7 +26,6 @@ class Snapshot final : public io::net::udp::Receiver::Handler, public Parser::Ha
     virtual void operator()(Trace<GatewayStatus> const &) = 0;
     virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
     virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
-    virtual void operator()(Trace<MarketByPriceUpdate> const &, bool is_last) = 0;
     virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
     virtual void operator()(Trace<CustomMetrics> const &, bool is_last) = 0;
   };

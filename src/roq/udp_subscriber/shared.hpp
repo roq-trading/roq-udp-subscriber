@@ -14,6 +14,8 @@
 
 #include "roq/core/fbs/decoder.hpp"
 
+#include "roq/core/market/mbp_sequencer.hpp"
+
 namespace roq {
 namespace udp_subscriber {
 
@@ -23,23 +25,10 @@ struct Shared final {
   Shared(Shared &&) = default;
   Shared(Shared const &) = delete;
 
-  auto discard_symbol(std::string_view const &name) const { return dispatcher_.discard_symbol(name); }
   template <typename... Args>
   auto operator()(Args &&...args) {
     return dispatcher_(std::forward<Args>(args)...);
   }
-
-  /*
-  template <typename Callback>
-  bool find_state(auto object_type, auto object_id, Callback callback) {
-    auto iter = waiting.find({object_type, object_id});
-    if (iter != std::end(waiting)) {
-      callback((*iter).second);
-      return true;
-    }
-    return false;
-  }
-  */
 
  private:
   server::Dispatcher &dispatcher_;
@@ -53,9 +42,13 @@ struct Shared final {
 
   struct State final {
     bool ready = false;
-    std::optional<uint32_t> last_seqno = {};  // begin of collection or last update if good
+    std::optional<uint32_t> last_seqno = {};
   };
   absl::node_hash_map<std::pair<uint8_t, uint16_t>, State> state;
+
+  absl::flat_hash_map<Symbol, core::market::MBP_Sequencer> mbp_collector;
+
+  std::vector<MBPUpdate> final_bids, final_asks;
 };
 
 }  // namespace udp_subscriber
