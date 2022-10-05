@@ -5,13 +5,13 @@
     {
       "name": "config_file",
       "type": "std::string",
-      "validator": "roq::core::flags::Path<std::string>",
+      "validator": "roq::core::flags::Path",
       "description": "config file (path)"
     },
     {
       "name": "exchange",
       "type": "std::string",
-      "validator": "roq::core::flags::NonEmpty<std::string>",
+      "validator": "roq::core::flags::NonEmpty",
       "default": "sub",
       "description": "exchange identifier (string)"
     },
