@@ -13,8 +13,8 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
-Config::Config(std::string_view const &config_path) {
-  server::ConfigReader::parse_file(*this, config_path, {});
+Config::Config() {
+  server::ConfigReader::parse_file(*this);
 }
 
 std::string Config::get_master_account() const {

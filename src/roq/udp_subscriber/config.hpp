@@ -20,7 +20,7 @@ namespace udp_subscriber {
 
 class Config final : public server::Config, public server::ConfigReader::Handler {
  public:
-  Config(std::string_view const &config_path);
+  Config();
 
   std::string get_master_account() const;
 

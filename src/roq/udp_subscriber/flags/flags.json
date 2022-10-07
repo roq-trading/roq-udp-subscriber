@@ -3,12 +3,6 @@
   "type": "flags",
   "values": [
     {
-      "name": "config_file",
-      "type": "std::string",
-      "validator": "roq::core::flags::Path",
-      "description": "config file (path)"
-    },
-    {
       "name": "exchange",
       "type": "std::string",
       "validator": "roq::core::flags::NonEmpty",

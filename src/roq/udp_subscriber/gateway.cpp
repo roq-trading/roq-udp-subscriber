@@ -17,13 +17,13 @@ Gateway::Gateway(server::Dispatcher &dispatcher, Config const &, io::Context &co
 }
 
 void Gateway::operator()(Event<Start> const &event) {
-  log::info("Starting the gateway..."sv);
+  log::info("Starting..."sv);
   snapshot_(event);
   incremental_(event);
 }
 
 void Gateway::operator()(Event<Stop> const &event) {
-  log::info("Stopping the gateway..."sv);
+  log::info("Stopping..."sv);
   incremental_(event);
   snapshot_(event);
 }
