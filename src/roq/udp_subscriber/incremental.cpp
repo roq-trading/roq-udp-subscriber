@@ -23,7 +23,7 @@ namespace udp_subscriber {
 // === CONSTANTS ===
 
 namespace {
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::TOP_OF_BOOK,
 };
 }

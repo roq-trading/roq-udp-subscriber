@@ -10,17 +10,23 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
+// === CONSTANTS ===
+
+namespace {
+server::Settings const SETTINGS{
+    .package_name = ROQ_PACKAGE_NAME,
+    .build_number = ROQ_BUILD_NUMBER,
+    .api = {},
+    .type = server::Type::ORDER_MANAGEMENT,
+};
+}  // namespace
+
+// === IMPLEMENTATION ===
+
 int Application::main(int, char **) {
   Config config;
-  log::info<1>("config={}"sv, config);
   auto context = server::create_io_context();
-  server::Settings settings{
-      .package_name = ROQ_PACKAGE_NAME,
-      .build_number = ROQ_BUILD_NUMBER,
-      .api = {},
-      .type = server::Type::ORDER_MANAGEMENT,
-  };
-  server::Router<Gateway>(settings, config, *context).dispatch();
+  server::Router<Gateway>{SETTINGS, config, *context}.dispatch();
   return EXIT_SUCCESS;
 }
 
