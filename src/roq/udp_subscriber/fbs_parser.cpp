@@ -6,7 +6,8 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/core/clock.hpp"
+#include "roq/clock.hpp"
+
 #include "roq/core/patterns.hpp"
 
 using namespace std::literals;
@@ -61,11 +62,11 @@ void FBSParser::dispatch_helper(
 template <typename T>
 void FBSParser::dispatch(Handler &handler, Event<T> const &event, Header const &header) {
   auto &[message_info, value] = event;
-  auto now = core::clock::GetSystem();
+  auto now = clock::get_system();
   TraceInfo trace_info{
-      .source_receive_time = now,
-      .origin_create_time = now,
-      .origin_create_time_utc = message_info.origin_create_time_utc,
+      now,
+      now,
+      message_info.origin_create_time_utc,
   };
   Trace trace{trace_info, value};
   handler(trace, header);

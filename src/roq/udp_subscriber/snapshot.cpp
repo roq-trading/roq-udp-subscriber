@@ -63,7 +63,7 @@ void Snapshot::operator()(Event<Timer> const &event) {
     return;
   if ((last_update_time_ + flags::Flags::udp_heartbeat_timeout()) < event.value.now) {
     last_update_time_ = {};
-    auto trace_info = server::create_trace_info();
+    TraceInfo trace_info;
     publish_stream_status(trace_info, ConnectionStatus::DISCONNECTED);
   }
 }
@@ -72,7 +72,7 @@ void Snapshot::operator()(metrics::Writer &) {
 }
 
 void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   auto parse = [&](auto &header, auto &payload) {
     log::info<5>("header={}, len(payload)={}"sv, header, std::size(payload));
     // note! different session id drops
