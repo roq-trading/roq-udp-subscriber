@@ -32,7 +32,7 @@ $PREFIX "./roq-udp-subscriber" \
   --event_log_dir "$HOME/var/lib/roq/data" \
   --event_log_symlink \
   --client_listen_address "$HOME/run/$NAME.sock" \
-  --metrics_listen_address "$HOME/run/${NAME}_metrics.sock" \
+  --service_listen_address "$HOME/run/${NAME}_metrics.sock" \
   --udp_snapshot_port $UDP_SNAPSHOT_PORT \
   --udp_incremental_port $UDP_INCREMENTAL_PORT \
   $@
