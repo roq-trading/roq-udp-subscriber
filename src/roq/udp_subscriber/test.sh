@@ -29,8 +29,9 @@ fi
 $PREFIX "./roq-udp-subscriber" \
   --name "$NAME" \
   --config_file "$CONFIG_FILE" \
+  --cache_dir "$HOME/var/lib/roq/cache" \
   --event_log_dir "$HOME/var/lib/roq/data" \
-  --event_log_symlink \
+  --event_log_symlink true \
   --client_listen_address "$HOME/run/$NAME.sock" \
   --service_listen_address "$HOME/run/${NAME}_metrics.sock" \
   --udp_snapshot_port $UDP_SNAPSHOT_PORT \

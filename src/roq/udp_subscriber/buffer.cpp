@@ -22,9 +22,9 @@ Buffer::Buffer() : assembly_(MAX_BUFFERS) {
 }
 
 Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte const> const &payload) {
-  // log::debug("frame={}, len(payload)={}"sv, frame, std::size(payload));
+  log::info<5>("frame={}, len(payload)={}"sv, frame, std::size(payload));
   auto seqno = frame.seqno;
-  // log::debug("seqno={}, next={}"sv, seqno, next_seqno_);
+  log::info<5>("seqno={}, next={}"sv, seqno, next_seqno_);
   // reset
   if (session_id_ != frame.session_id) {
     if (session_id_)
