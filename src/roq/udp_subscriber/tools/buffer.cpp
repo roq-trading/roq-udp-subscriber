@@ -24,8 +24,10 @@ Buffer::Buffer() : assembly_(MAX_BUFFERS) {
 
 Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte const> const &payload) {
   log::info<5>("frame={}, len(payload)={}"sv, frame, std::size(payload));
+  // log::debug("frame={}, len(payload)={}"sv, frame, std::size(payload));
   auto seqno = frame.seqno;
   log::info<5>("seqno={}, next={}"sv, seqno, next_seqno_);
+  // log::debug("seqno={}, next={}"sv, seqno, next_seqno_);
   // reset
   if (session_id_ != frame.session_id) {
     if (session_id_)
@@ -33,9 +35,9 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
     session_id_ = frame.session_id;
     next_seqno_ = seqno;
   }
-  // replay
+  // drop
   if (is_replay(seqno))
-    return Status::READY;
+    return Status::BUFFERING;
   // simple
   if (seqno == next_seqno_ && frame.fragment_max == 0) {
     advance();
@@ -75,8 +77,8 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
   if (process()) {
     // all good
   } else {
-    if (distance(seqno) == MAX_BUFFERS) {
-      // special case: we might have some "good" messages towards the end of the buffer
+    // no space
+    if (distance(seqno) == MAX_BUFFERS) {  // special case: maybe some "good" messages?
       auto next_seqno = seqno;
       auto ok = true;
       // note! reverse
@@ -90,9 +92,10 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
         ok = false;
         item.reset();
       }
-      assert(!ok);  // we shouldn't get here if there wasn't an issue
       log::warn("+++ SEQUENCE GAP {} --> {} +++"sv, next_seqno_, next_seqno);
+      assert(!ok);  // we shouldn't get here if there wasn't an issue
       next_seqno_ = next_seqno;
+      result = Status::READY;
       // XXX copy + dispatch
     } else {
       // gap is too big: reset
