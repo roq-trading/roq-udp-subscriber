@@ -14,11 +14,11 @@ namespace udp_subscriber {
 
 struct FBSParser final : public Parser {
   static void dispatch_helper(
-      Handler &, std::span<std::byte const> const &payload, TraceInfo const &, Shared &, Header const &);
+      Handler &, std::span<std::byte const> const &payload, TraceInfo const &, Shared &, tools::Header const &);
 
  private:
   template <typename T>
-  static void dispatch(Handler &, Event<T> const &, Header const &);
+  static void dispatch(Handler &, Event<T> const &, tools::Header const &);
 };
 
 }  // namespace udp_subscriber

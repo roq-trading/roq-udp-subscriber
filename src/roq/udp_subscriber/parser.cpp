@@ -15,7 +15,7 @@ namespace udp_subscriber {
 
 size_t Parser::dispatch(
     Handler &handler,
-    Header const &header,
+    tools::Header const &header,
     std::span<std::byte const> const &payload,
     TraceInfo const &trace_info,
     Shared &shared) {

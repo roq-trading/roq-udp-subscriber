@@ -7,10 +7,11 @@
 
 #include "roq/core/udp/frame.hpp"
 
-#include "roq/udp_subscriber/header.hpp"
+#include "roq/udp_subscriber/tools/header.hpp"
 
 namespace roq {
 namespace udp_subscriber {
+namespace tools {
 
 struct Buffer final {
   enum class Status {
@@ -22,7 +23,8 @@ struct Buffer final {
   Buffer();
 
   template <typename Callback>
-  void operator()(core::udp::Frame const &frame, std::span<std::byte const> const &payload, Callback callback) {
+  bool operator()(core::udp::Frame const &frame, std::span<std::byte const> const &payload, Callback callback) {
+    auto result = false;
     auto status = update(frame, payload);
     switch (status) {
       using enum Status;
@@ -38,6 +40,7 @@ struct Buffer final {
             .encoding = core::udp::encoding_from_control(frame.control),
             .snapshot = core::udp::snapshot_from_control(frame.control),
         };
+        result = true;
         callback(header, payload);
         [[fallthrough]];  // note! possible re-ordering
       }
@@ -56,18 +59,21 @@ struct Buffer final {
               .snapshot = item.snapshot,
           };
           auto payload = std::span{std::data(item.payload), item.size};
+          result = true;
           callback(header, payload);
           item.reset();
           advance();
         }
         break;
     }
+    return result;
   }
 
  protected:
   Status update(core::udp::Frame const &, std::span<std::byte const> const &payload);
 
   size_t distance(uint32_t seqno);
+  bool is_replay(uint32_t seqno);
 
   void advance();
 
@@ -101,5 +107,6 @@ struct Buffer final {
   std::vector<Item> assembly_;
 };
 
+}  // namespace tools
 }  // namespace udp_subscriber
 }  // namespace roq

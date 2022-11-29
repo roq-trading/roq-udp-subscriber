@@ -126,47 +126,47 @@ void Incremental::operator()(io::net::udp::Receiver::Error const &error) {
   log::fatal("Error: what={}"sv, error.what);
 }
 
-void Incremental::operator()(Trace<Parser::Heartbeat> const &event, Header const &header) {
+void Incremental::operator()(Trace<Parser::Heartbeat> const &event, tools::Header const &header) {
   update(event, header);
 }
 
-void Incremental::operator()(Trace<GatewaySettings> const &event, Header const &header) {
+void Incremental::operator()(Trace<GatewaySettings> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event);
 }
 
-void Incremental::operator()(Trace<StreamStatus> const &event, Header const &header) {
+void Incremental::operator()(Trace<StreamStatus> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event);
 }
 
-void Incremental::operator()(Trace<ExternalLatency> const &event, Header const &header) {
+void Incremental::operator()(Trace<ExternalLatency> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event);
 }
 
-void Incremental::operator()(Trace<GatewayStatus> const &event, Header const &header) {
+void Incremental::operator()(Trace<GatewayStatus> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event);
 }
 
-void Incremental::operator()(Trace<ReferenceData> const &event, Header const &header) {
+void Incremental::operator()(Trace<ReferenceData> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<MarketStatus> const &event, Header const &header) {
+void Incremental::operator()(Trace<MarketStatus> const &event, tools::Header const &header) {
   if (update(event, header)) {
     handler_(event, true);
   }
 }
 
-void Incremental::operator()(Trace<TopOfBook> const &event, Header const &header) {
+void Incremental::operator()(Trace<TopOfBook> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, Header const &header) {
+void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header const &header) {
   if (update(event, header)) {
     auto &trace_info = event.trace_info;
     auto &market_by_price_update = event.value;
@@ -230,17 +230,17 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, Header con
   }
 }
 
-void Incremental::operator()(Trace<TradeSummary> const &event, Header const &header) {
+void Incremental::operator()(Trace<TradeSummary> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<StatisticsUpdate> const &event, Header const &header) {
+void Incremental::operator()(Trace<StatisticsUpdate> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event, true);
 }
 
-void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, Header const &header) {
+void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, tools::Header const &header) {
   if (update(event, header)) {
     auto &[trace_info, value] = event;
     CustomMetrics const custom_metrics{
@@ -256,7 +256,7 @@ void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, Header con
 }
 
 template <typename T>
-bool Incremental::update(Trace<T> const &event, Header const &) {
+bool Incremental::update(Trace<T> const &event, tools::Header const &) {
   // heartbeat
   auto &trace_info = event.trace_info;
   if (!last_update_time_.count())

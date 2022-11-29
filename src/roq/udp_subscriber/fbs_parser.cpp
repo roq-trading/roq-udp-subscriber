@@ -22,7 +22,7 @@ void FBSParser::dispatch_helper(
     std::span<std::byte const> const &payload,
     [[maybe_unused]] TraceInfo const &,
     Shared &shared,
-    Header const &header) {
+    tools::Header const &header) {
   auto event = core::fbs::Decoder::create_event(payload);
   auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
   // log::debug("message_info={}"sv, message_info);
@@ -60,7 +60,7 @@ void FBSParser::dispatch_helper(
 }
 
 template <typename T>
-void FBSParser::dispatch(Handler &handler, Event<T> const &event, Header const &header) {
+void FBSParser::dispatch(Handler &handler, Event<T> const &event, tools::Header const &header) {
   auto &[message_info, value] = event;
   auto now = clock::get_system();
   TraceInfo trace_info{

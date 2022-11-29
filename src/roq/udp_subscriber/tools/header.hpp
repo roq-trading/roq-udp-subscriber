@@ -6,6 +6,7 @@
 
 namespace roq {
 namespace udp_subscriber {
+namespace tools {
 
 struct Header final {
   uint16_t session_id = {};
@@ -17,17 +18,18 @@ struct Header final {
   bool snapshot = {};
 };
 
+}  // namespace tools
 }  // namespace udp_subscriber
 }  // namespace roq
 
 template <>
-struct fmt::formatter<roq::udp_subscriber::Header> {
+struct fmt::formatter<roq::udp_subscriber::tools::Header> {
   template <typename Context>
   constexpr auto parse(Context &context) {
     return std::begin(context);
   }
   template <typename Context>
-  auto format(roq::udp_subscriber::Header const &value, Context &context) const {
+  auto format(roq::udp_subscriber::tools::Header const &value, Context &context) const {
     using namespace std::literals;
     return fmt::format_to(
         context.out(),

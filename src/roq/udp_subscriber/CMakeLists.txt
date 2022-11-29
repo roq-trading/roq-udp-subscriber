@@ -1,10 +1,10 @@
 set(TARGET_NAME "${PROJECT_NAME}")
 
 add_subdirectory(flags)
+add_subdirectory(tools)
 
 set(SOURCES
     application.cpp
-    buffer.cpp
     config.cpp
     fbs_parser.cpp
     flags.cpp
@@ -21,6 +21,7 @@ add_executable("${TARGET_NAME}" ${SOURCES})
 target_link_libraries(
   "${TARGET_NAME}"
   PRIVATE "${PROJECT_NAME}-flags"
+          "${PROJECT_NAME}-tools"
           roq-server::roq-server
           roq-io::roq-io
           roq-core::roq-core

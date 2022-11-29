@@ -124,44 +124,44 @@ void Snapshot::operator()(io::net::udp::Receiver::Error const &error) {
   log::fatal("Error: what={}"sv, error.what);
 }
 
-void Snapshot::operator()(Trace<Parser::Heartbeat> const &event, Header const &header) {
+void Snapshot::operator()(Trace<Parser::Heartbeat> const &event, tools::Header const &header) {
   update(event, header);
 }
 
-void Snapshot::operator()(Trace<GatewaySettings> const &event, Header const &header) {
+void Snapshot::operator()(Trace<GatewaySettings> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event);
 }
 
-void Snapshot::operator()(Trace<StreamStatus> const &event, Header const &header) {
+void Snapshot::operator()(Trace<StreamStatus> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event);
 }
 
-void Snapshot::operator()(Trace<ExternalLatency> const &, Header const &) {
+void Snapshot::operator()(Trace<ExternalLatency> const &, tools::Header const &) {
   log::fatal("Unexpected"sv);
 }
 
-void Snapshot::operator()(Trace<GatewayStatus> const &event, Header const &header) {
+void Snapshot::operator()(Trace<GatewayStatus> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event);
 }
 
-void Snapshot::operator()(Trace<ReferenceData> const &event, Header const &header) {
+void Snapshot::operator()(Trace<ReferenceData> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event, true);
 }
 
-void Snapshot::operator()(Trace<MarketStatus> const &event, Header const &header) {
+void Snapshot::operator()(Trace<MarketStatus> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event, true);
 }
 
-void Snapshot::operator()(Trace<TopOfBook> const &, Header const &) {
+void Snapshot::operator()(Trace<TopOfBook> const &, tools::Header const &) {
   log::fatal("Unexpected"sv);
 }
 
-void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, Header const &header) {
+void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header const &header) {
   if (update(event, header)) {
     auto &trace_info = event.trace_info;
     auto &market_by_price_update = event.value;
@@ -203,16 +203,16 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, Header const 
   }
 }
 
-void Snapshot::operator()(Trace<TradeSummary> const &, Header const &) {
+void Snapshot::operator()(Trace<TradeSummary> const &, tools::Header const &) {
   log::fatal("Unexpected"sv);
 }
 
-void Snapshot::operator()(Trace<StatisticsUpdate> const &event, Header const &header) {
+void Snapshot::operator()(Trace<StatisticsUpdate> const &event, tools::Header const &header) {
   if (update(event, header))
     handler_(event, true);
 }
 
-void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, Header const &header) {
+void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, tools::Header const &header) {
   if (update(event, header)) {
     auto &[trace_info, value] = event;
     CustomMetrics const custom_metrics{
@@ -228,7 +228,7 @@ void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, Header const 
 }
 
 template <typename T>
-bool Snapshot::update(Trace<T> const &event, Header const &) {
+bool Snapshot::update(Trace<T> const &event, tools::Header const &) {
   // heartbeat
   auto &trace_info = event.trace_info;
   if (!last_update_time_.count())

@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/udp_subscriber/buffer.hpp"
+#include "roq/udp_subscriber/tools/buffer.hpp"
 
 #include <algorithm>
 #include <limits>
@@ -11,11 +11,12 @@ using namespace std::literals;
 
 namespace roq {
 namespace udp_subscriber {
+namespace tools {
 
 namespace {
-const constexpr size_t MAX_PAYLOAD = core::udp::MAX_PAYLOAD_LENGTH;
-const constexpr size_t MAX_BUFFER = MAX_PAYLOAD * size_t{256};
-const constexpr size_t MAX_BUFFERS = 16;
+auto const MAX_PAYLOAD = core::udp::MAX_PAYLOAD_LENGTH;
+auto const MAX_BUFFER = MAX_PAYLOAD * size_t{256};
+auto const MAX_BUFFERS = size_t{16};
 }  // namespace
 
 Buffer::Buffer() : assembly_(MAX_BUFFERS) {
@@ -32,6 +33,10 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
     session_id_ = frame.session_id;
     next_seqno_ = seqno;
   }
+  // replay
+  if (is_replay(seqno))
+    return Status::READY;
+  // simple
   if (seqno == next_seqno_ && frame.fragment_max == 0) {
     advance();
     // log::debug("next={}"sv, next_seqno_);
@@ -71,8 +76,10 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
     // all good
   } else {
     if (distance(seqno) == MAX_BUFFERS) {
+      // special case: we might have some "good" messages towards the end of the buffer
       auto next_seqno = seqno;
       auto ok = true;
+      // note! reverse
       for (size_t offset = 0; offset < MAX_BUFFERS; ++offset) {
         auto seqno = next_seqno_ + (MAX_BUFFERS - offset - 1);
         auto &item = get_item(seqno);
@@ -88,6 +95,7 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
       next_seqno_ = next_seqno;
       // XXX copy + dispatch
     } else {
+      // gap is too big: reset
       reset();
       log::warn("+++ SEQUENCE GAP {} --> {} +++"sv, next_seqno_, seqno);
       next_seqno_ = seqno;
@@ -95,7 +103,7 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
     if (process()) {
       // all good
     } else {
-      log::fatal("Unexpected"sv);
+      log::fatal("Unexpected: buffer is full"sv);
     }
     // result = Status::RESET;
   }
@@ -111,16 +119,30 @@ constexpr size_t diff(T lhs, T rhs) {
     return lhs - rhs;
   return lhs + (std::numeric_limits<T>::max() - rhs) + 1;
 }
+// normal
 static_assert(diff<uint8_t>(0, 0) == 0);
 static_assert(diff<uint8_t>(1, 0) == 1);
 static_assert(diff<uint8_t>(2, 0) == 2);
 static_assert(diff<uint8_t>(255, 255) == 0);
 static_assert(diff<uint8_t>(0, 255) == 1);
 static_assert(diff<uint8_t>(1, 255) == 2);
+// replay
+static_assert(diff<uint8_t>(0, 1) == 255);
+static_assert(diff<uint8_t>(0, 2) == 254);
+static_assert(diff<uint8_t>(255, 0) == 255);
+static_assert(diff<uint8_t>(254, 0) == 254);
+static_assert(diff<uint8_t>(255, 1) == 254);
+static_assert(diff<uint8_t>(254, 1) == 253);
 }  // namespace
 
 size_t Buffer::distance(uint32_t seqno) {
   return diff(seqno, next_seqno_);
+}
+
+bool Buffer::is_replay(uint32_t seqno) {
+  constexpr auto const THRESHOLD = 3 * (uint32_t{1} << 30);
+  auto tmp = diff(seqno, next_seqno_);
+  return tmp > THRESHOLD;
 }
 
 void Buffer::advance() {
@@ -165,5 +187,6 @@ void Buffer::Item::reset() {
   size = {};
 }
 
+}  // namespace tools
 }  // namespace udp_subscriber
 }  // namespace roq
