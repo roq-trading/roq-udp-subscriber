@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* UDP publishing to multiple destinations (#302)
+
 ### Fixed
 
 * Support UDP datagram replay (#301)
