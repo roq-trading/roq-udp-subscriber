@@ -33,11 +33,11 @@ namespace {
 auto create_receiver(auto &handler, auto &context) {
   auto address = server::Flags::udp_snapshot_address();
   auto port = server::Flags::udp_snapshot_port();
-  std::string tmp{std::empty(address) ? "127.0.0.1"sv : address};  // note! default is localhost
+  std::string tmp{std::empty(address) ? "127.0.0.1"sv : address[0]};  // note! default is localhost
   struct in_addr localhost {
     .s_addr = inet_addr(tmp.c_str()),
   };
-  auto network_address = io::NetworkAddress{port, localhost};
+  auto network_address = io::NetworkAddress{port[0], localhost};
   auto socket_options = Mask{
       io::SocketOption::REUSE_ADDRESS,
   };
