@@ -11,6 +11,7 @@ namespace udp_subscriber {
 
 struct Reader final {
   Reader();
+
   template <typename Receiver, typename Callback>
   bool recv(Receiver &receiver, Callback callback) {
     auto bytes = receiver.recv(buffer_);

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "roq/server.hpp"
 
@@ -70,7 +71,7 @@ class Snapshot final : public io::net::udp::Receiver::Handler, public Parser::Ha
   // shared
   Shared &shared_;
   // io
-  std::unique_ptr<io::net::udp::Receiver> receiver_;
+  std::vector<std::unique_ptr<io::net::udp::Receiver>> receivers_;
   Reader reader_;
   tools::Buffer buffer_;
   // status

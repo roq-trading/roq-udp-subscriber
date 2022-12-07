@@ -30,26 +30,42 @@ Mask const SUPPORTS{
 // === HELPERS ===
 
 namespace {
-auto create_receiver(auto &handler, auto &context) {
-  auto address = server::Flags::udp_snapshot_address();
-  auto port = server::Flags::udp_snapshot_port();
-  std::string tmp{std::empty(address) ? "127.0.0.1"sv : address[0]};  // note! default is localhost
+auto create_receiver_helper(auto &handler, auto &context, auto &address, auto port) {
+  std::string tmp{std::empty(address) ? "127.0.0.1"sv : address};  // note! default is localhost
   struct in_addr localhost {
     .s_addr = inet_addr(tmp.c_str()),
   };
-  auto network_address = io::NetworkAddress{port[0], localhost};
+  auto network_address = io::NetworkAddress{port, localhost};
   auto socket_options = Mask{
       io::SocketOption::REUSE_ADDRESS,
   };
   auto receiver = context.create_udp_receiver(handler, network_address, socket_options);
   return receiver;
 }
+
+auto create_receivers(auto &handler, auto &context) {
+  auto address = server::Flags::udp_snapshot_address();
+  auto port = server::Flags::udp_snapshot_port();
+  if (std::empty(port))
+    log::fatal("Unexpected: port is missing"sv);
+  if (std::size(port) > 1 && std::size(address) > 1 && std::size(port) != std::size(address))
+    log::fatal("Unexpected: mismatched length of address and port"sv);
+  std::vector<std::unique_ptr<io::net::udp::Receiver>> result;
+  auto length = std::max(std::size(address), std::size(port));
+  for (size_t i = 0; i < length; ++i) {
+    auto address_ = std::empty(address) ? std::string{} : address[std::min(i, std::size(address) - 1)];
+    auto port_ = port[std::min(i, std::size(port) - 1)];
+    auto sender = create_receiver_helper(handler, context, address_, port_);
+    result.emplace_back(std::move(sender));
+  }
+  return result;
+}
 }  // namespace
 
 // === IMPLEMENTATION ===
 
 Snapshot::Snapshot(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), shared_(shared), receiver_(create_receiver(*this, context)) {
+    : handler_(handler), stream_id_(stream_id), shared_(shared), receivers_(create_receivers(*this, context)) {
 }
 
 void Snapshot::operator()(Event<Start> const &) {
@@ -71,7 +87,7 @@ void Snapshot::operator()(Event<Timer> const &event) {
 void Snapshot::operator()(metrics::Writer &) {
 }
 
-void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
+void Snapshot::operator()(io::net::udp::Receiver::Read const &read) {
   TraceInfo trace_info;
   auto parse = [&](auto &header, auto &payload) {
     log::info<5>("header={}, len(payload)={}"sv, header, std::size(payload));
@@ -111,7 +127,7 @@ void Snapshot::operator()(io::net::udp::Receiver::Read const &) {
         log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
     }
   };
-  if (reader_.recv(*receiver_, [&](auto &frame, auto &payload) {
+  if (reader_.recv(read.receiver, [&](auto &frame, auto &payload) {
         log::info<5>("frame={}, len(payload)={}"sv, frame, std::size(payload));
         buffer_(frame, payload, parse);
       })) {
