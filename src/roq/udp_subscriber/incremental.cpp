@@ -4,7 +4,9 @@
 
 #include <arpa/inet.h>
 
+#include <algorithm>
 #include <string>
+#include <utility>
 
 #include "roq/utils/common.hpp"
 #include "roq/utils/update.hpp"
