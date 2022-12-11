@@ -20,6 +20,7 @@ requirements:
     - clangdev
     - cmake
     - make
+    - pkg-config
   host:
     - flatbuffers
     - nlohmann_json
