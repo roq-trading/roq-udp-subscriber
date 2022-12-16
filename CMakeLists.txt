@@ -57,7 +57,7 @@ find_package(roq-logging REQUIRED)
 find_package(roq-server REQUIRED)
 
 if(UNIX AND NOT APPLE)
-  find_package(rt REQUIRED) # XXX
+  find_package(rt REQUIRED)
 endif()
 
 find_package(PkgConfig REQUIRED)
