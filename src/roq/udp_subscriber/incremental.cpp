@@ -285,7 +285,8 @@ bool Incremental::update(Trace<T> const &event, tools::Header const &) {
     auto result = !last_update_time_.count();
     using value_type = typename std::remove_cvref<T>::type;
     if constexpr (std::is_same<value_type, GatewayStatus>::value) {
-      result |= utils::update(supports_, event.value.supported);
+      auto masked = SUPPORTS.logical_and(event.value.supported);
+      result |= utils::update(supports_, masked);
     }
     return result;
   }();
