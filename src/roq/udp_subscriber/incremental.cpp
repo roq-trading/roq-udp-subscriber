@@ -25,8 +25,14 @@ namespace udp_subscriber {
 // === CONSTANTS ===
 
 namespace {
-Mask const SUPPORTS{
+auto const SUPPORTS = Mask{
+    SupportType::REFERENCE_DATA,
+    SupportType::MARKET_STATUS,
     SupportType::TOP_OF_BOOK,
+    SupportType::MARKET_BY_PRICE,
+    SupportType::MARKET_BY_ORDER,
+    SupportType::TRADE_SUMMARY,
+    SupportType::STATISTICS,
 };
 }
 
@@ -154,8 +160,7 @@ void Incremental::operator()(Trace<GatewaySettings> const &event, tools::Header 
 }
 
 void Incremental::operator()(Trace<StreamStatus> const &event, tools::Header const &header) {
-  if (update(event, header))
-    handler_(event);
+  update(event, header);
 }
 
 void Incremental::operator()(Trace<ExternalLatency> const &event, tools::Header const &header) {
@@ -275,30 +280,37 @@ void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, tools::Hea
 
 template <typename T>
 bool Incremental::update(Trace<T> const &event, tools::Header const &) {
-  // heartbeat
   auto &trace_info = event.trace_info;
-  if (!last_update_time_.count())
+  auto updated = [&]() {
+    auto result = !last_update_time_.count();
+    using value_type = typename std::remove_cvref<T>::type;
+    if constexpr (std::is_same<value_type, GatewayStatus>::value) {
+      result |= utils::update(supports_, event.value.supported);
+    };
+    return result;
+  }();
+  if (updated) {
+    // note! always READY because we just got an update
     publish_stream_status(trace_info, ConnectionStatus::READY);
+  }
   last_update_time_ = trace_info.source_receive_time;
   return true;
 }
 
-void Incremental::publish_stream_status(TraceInfo const &, ConnectionStatus connection_status) {
+void Incremental::publish_stream_status(TraceInfo const &trace_info, ConnectionStatus connection_status) {
   if (!utils::update(connection_status_, connection_status))
     return;
-  /* XXX FIXME competing with StreamStatus from origin...???
-  StreamStatus const stream_status{
+  StreamStatus stream_status{
       .stream_id = stream_id_,
       .account = {},
-      .supports = SUPPORTS,
+      .supports = supports_,
       .transport = Transport::UDP,
-      .protocol = {},  // note! can only be discovered
-      .encoding = {},  // note! can only be discovered
+      .protocol = Protocol::ROQ,
+      .encoding = {Encoding::FBS},
       .priority = Priority::PRIMARY,
       .connection_status = connection_status_,
   };
   create_trace_and_dispatch(handler_, trace_info, stream_status);
-  */
 }
 
 }  // namespace udp_subscriber

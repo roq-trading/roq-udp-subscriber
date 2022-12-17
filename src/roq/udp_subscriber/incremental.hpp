@@ -81,6 +81,7 @@ class Incremental final : public io::net::udp::Receiver::Handler, public Parser:
   // status
   std::chrono::nanoseconds last_update_time_ = {};
   ConnectionStatus connection_status_ = {};
+  Mask<SupportType> supports_;
 };
 
 }  // namespace udp_subscriber
