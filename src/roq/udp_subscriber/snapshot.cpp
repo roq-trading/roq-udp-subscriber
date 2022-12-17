@@ -28,12 +28,12 @@ auto const SUPPORTS = Mask{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
     SupportType::TOP_OF_BOOK,
-    SupportType::MARKET_BY_PRICE,
-    SupportType::MARKET_BY_ORDER,
+    // SupportType::MARKET_BY_PRICE,
+    // SupportType::MARKET_BY_ORDER,
     SupportType::TRADE_SUMMARY,
     SupportType::STATISTICS,
 };
-}
+}  // namespace
 
 // === HELPERS ===
 
@@ -258,7 +258,7 @@ bool Snapshot::update(Trace<T> const &event, tools::Header const &) {
     using value_type = typename std::remove_cvref<T>::type;
     if constexpr (std::is_same<value_type, GatewayStatus>::value) {
       result |= utils::update(supports_, event.value.supported);
-    };
+    }
     return result;
   }();
   if (updated) {
