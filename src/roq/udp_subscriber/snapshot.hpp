@@ -62,7 +62,7 @@ class Snapshot final : public io::net::udp::Receiver::Handler, public Parser::Ha
   template <typename T>
   bool update(Trace<T> const &, tools::Header const &);
 
-  void publish_stream_status(TraceInfo const &, ConnectionStatus);
+  void publish_stream_status(TraceInfo const &, Mask<SupportType>, ConnectionStatus);
 
  private:
   Handler &handler_;

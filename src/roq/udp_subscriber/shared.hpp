@@ -30,6 +30,8 @@ struct Shared final {
     return dispatcher_(std::forward<Args>(args)...);
   }
 
+  bool update(Mask<SupportType>);
+
  private:
   server::Dispatcher &dispatcher_;
 
@@ -49,6 +51,8 @@ struct Shared final {
   absl::flat_hash_map<Symbol, core::market::MBP_Sequencer> mbp_collector;
 
   std::vector<MBPUpdate> final_bids, final_asks;
+
+  Mask<SupportType> supports;
 };
 
 }  // namespace udp_subscriber

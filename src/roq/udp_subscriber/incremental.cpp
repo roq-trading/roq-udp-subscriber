@@ -22,20 +22,6 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
-// === CONSTANTS ===
-
-namespace {
-auto const SUPPORTS = Mask{
-    SupportType::REFERENCE_DATA,
-    SupportType::MARKET_STATUS,
-    SupportType::TOP_OF_BOOK,
-    // SupportType::MARKET_BY_PRICE,
-    // SupportType::MARKET_BY_ORDER,
-    SupportType::TRADE_SUMMARY,
-    SupportType::STATISTICS,
-};
-}  // namespace
-
 // === HELPERS ===
 
 namespace {
@@ -89,7 +75,7 @@ void Incremental::operator()(Event<Timer> const &event) {
   if ((last_update_time_ + flags::Flags::udp_heartbeat_timeout()) < event.value.now) {
     last_update_time_ = {};
     TraceInfo trace_info;
-    publish_stream_status(trace_info, ConnectionStatus::DISCONNECTED);
+    publish_stream_status(trace_info, supports_, ConnectionStatus::DISCONNECTED);
   }
 }
 
@@ -285,33 +271,32 @@ bool Incremental::update(Trace<T> const &event, tools::Header const &) {
     auto result = !last_update_time_.count();
     using value_type = typename std::remove_cvref<T>::type;
     if constexpr (std::is_same<value_type, GatewayStatus>::value) {
-      auto masked = SUPPORTS.logical_and(event.value.supported);
-      result |= utils::update(supports_, masked);
+      // note! let snapshot update (for now, later we can do something with seqno)
+      result |= utils::compare(supports_, shared_.supports) != 0;
     }
     return result;
   }();
-  if (updated) {
-    // note! always READY because we just got an update
-    publish_stream_status(trace_info, ConnectionStatus::READY);
-  }
+  if (updated)
+    publish_stream_status(trace_info, shared_.supports, ConnectionStatus::READY);
   last_update_time_ = trace_info.source_receive_time;
   return true;
 }
 
-void Incremental::publish_stream_status(TraceInfo const &trace_info, ConnectionStatus connection_status) {
-  if (!utils::update(connection_status_, connection_status))
-    return;
-  StreamStatus stream_status{
-      .stream_id = stream_id_,
-      .account = {},
-      .supports = supports_,
-      .transport = Transport::UDP,
-      .protocol = Protocol::ROQ,
-      .encoding = {Encoding::FBS},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-  };
-  create_trace_and_dispatch(handler_, trace_info, stream_status);
+void Incremental::publish_stream_status(
+    TraceInfo const &trace_info, Mask<SupportType> supports, ConnectionStatus connection_status) {
+  if (utils::update(supports_, supports) || utils::update(connection_status_, connection_status)) {
+    StreamStatus stream_status{
+        .stream_id = stream_id_,
+        .account = {},
+        .supports = supports_,
+        .transport = Transport::UDP,
+        .protocol = Protocol::ROQ,
+        .encoding = {Encoding::FBS},
+        .priority = Priority::PRIMARY,
+        .connection_status = connection_status_,
+    };
+    create_trace_and_dispatch(handler_, trace_info, stream_status);
+  }
 }
 
 }  // namespace udp_subscriber
