@@ -272,8 +272,9 @@ bool Incremental::update(Trace<T> const &event, tools::Header const &) {
     using value_type = typename std::remove_cvref<T>::type;
     if constexpr (std::is_same<value_type, GatewayStatus>::value) {
       // note! let snapshot update (for now, later we can do something with seqno)
-      result |= utils::compare(supports_, shared_.supports) != 0;
     }
+    // note! instead we inherit from snapshot
+    result |= utils::compare(supports_, shared_.supports) != 0;
     return result;
   }();
   if (updated)
