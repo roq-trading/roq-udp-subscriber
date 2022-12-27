@@ -68,6 +68,7 @@ struct fmt::formatter<roq::udp_subscriber::Config> {
   template <typename Context>
   auto format(roq::udp_subscriber::Config const &value, Context &context) const {
     using namespace std::literals;
+    using namespace fmt::literals;
     return fmt::format_to(
         context.out(),
         R"({{)"
@@ -76,7 +77,7 @@ struct fmt::formatter<roq::udp_subscriber::Config> {
         R"(master_account="{}", )"
         R"(users=[{}], )"
         R"(rate_limits=[{}])"
-        R"(}})"sv,
+        R"(}})"_cf,
         value.symbols,
         fmt::join(value.accounts, ", "sv),
         value.master_account_,

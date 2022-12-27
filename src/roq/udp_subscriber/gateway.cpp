@@ -12,8 +12,8 @@ namespace roq {
 namespace udp_subscriber {
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &, io::Context &context)
-    : dispatcher_(dispatcher), context_(context), shared_(dispatcher), snapshot_(*this, context, ++stream_id_, shared_),
-      incremental_(*this, context, ++stream_id_, shared_) {
+    : dispatcher_{dispatcher}, context_{context}, shared_{dispatcher}, snapshot_{*this, context, ++stream_id_, shared_},
+      incremental_{*this, context, ++stream_id_, shared_} {
 }
 
 void Gateway::operator()(Event<Start> const &event) {
@@ -41,7 +41,7 @@ void Gateway::operator()(Event<Disconnected> const &) {
 
 uint16_t Gateway::operator()(
     Event<CreateOrder> const &, oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
-  throw oms::NotSupported("not supported"sv);
+  throw oms::NotSupported{"not supported"sv};
 }
 
 uint16_t Gateway::operator()(
@@ -49,7 +49,7 @@ uint16_t Gateway::operator()(
     oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
-  throw oms::NotSupported("not supported"sv);
+  throw oms::NotSupported{"not supported"sv};
 }
 
 uint16_t Gateway::operator()(
@@ -57,11 +57,11 @@ uint16_t Gateway::operator()(
     oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
-  throw oms::NotSupported("not supported"sv);
+  throw oms::NotSupported{"not supported"sv};
 }
 
 uint16_t Gateway::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
-  throw oms::NotSupported("not supported"sv);
+  throw oms::NotSupported{"not supported"sv};
 }
 
 void Gateway::operator()(metrics::Writer &) {

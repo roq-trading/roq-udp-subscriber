@@ -73,7 +73,7 @@ auto create_receivers(auto &handler, auto &context) {
 // === IMPLEMENTATION ===
 
 Snapshot::Snapshot(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), shared_(shared), receivers_(create_receivers(*this, context)) {
+    : handler_{handler}, stream_id_{stream_id}, shared_{shared}, receivers_{create_receivers(*this, context)} {
 }
 
 void Snapshot::operator()(Event<Start> const &) {
@@ -209,7 +209,7 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header
         Trace event(trace_info, market_by_price_update_2);
         shared_(event, true, [&](auto &market_by_price) { collector.apply(market_by_price, sequence, false); });
       };
-      auto request_snapshot = [&](auto retries) {
+      auto request_snapshot = [&]([[maybe_unused]] auto retries) {
         // XXX ???
       };
       collector(

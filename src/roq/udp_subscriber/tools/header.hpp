@@ -30,7 +30,7 @@ struct fmt::formatter<roq::udp_subscriber::tools::Header> {
   }
   template <typename Context>
   auto format(roq::udp_subscriber::tools::Header const &value, Context &context) const {
-    using namespace std::literals;
+    using namespace fmt::literals;
     return fmt::format_to(
         context.out(),
         R"({{)"
@@ -41,7 +41,7 @@ struct fmt::formatter<roq::udp_subscriber::tools::Header> {
         R"(object_id=\x{:04x}, )"
         R"(encoding={}, )"
         R"(snapshot={})"
-        R"(}})"sv,
+        R"(}})"_cf,
         value.session_id,
         value.seqno,
         value.last_seqno,

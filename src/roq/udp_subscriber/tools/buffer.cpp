@@ -149,7 +149,7 @@ bool Buffer::is_replay(uint32_t seqno) {
 }
 
 void Buffer::advance() {
-  get_buffer(next_seqno_, [&](auto &item) {
+  get_buffer(next_seqno_, [&]([[maybe_unused]] auto &item) {
     assert(!item.ready);
     assert(item.count == 0);
     assert(item.available.count() == 0);
