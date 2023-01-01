@@ -21,20 +21,6 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
-// === CONSTANTS ===
-
-namespace {
-auto const SUPPORTS = Mask{
-    SupportType::REFERENCE_DATA,
-    SupportType::MARKET_STATUS,
-    SupportType::TOP_OF_BOOK,
-    // SupportType::MARKET_BY_PRICE,
-    // SupportType::MARKET_BY_ORDER,
-    SupportType::TRADE_SUMMARY,
-    SupportType::STATISTICS,
-};
-}  // namespace
-
 // === HELPERS ===
 
 namespace {
