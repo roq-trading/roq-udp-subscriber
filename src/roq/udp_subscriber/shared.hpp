@@ -14,7 +14,7 @@
 
 #include "roq/core/fbs/decoder.hpp"
 
-#include "roq/core/market/mbp_sequencer.hpp"
+#include "roq/core/mbp/sequencer.hpp"
 
 namespace roq {
 namespace udp_subscriber {
@@ -48,7 +48,7 @@ struct Shared final {
   };
   absl::node_hash_map<std::pair<uint8_t, uint16_t>, State> state;
 
-  absl::flat_hash_map<Symbol, core::market::MBP_Sequencer> mbp_collector;
+  absl::flat_hash_map<Symbol, core::mbp::Sequencer> mbp_collector;
 
   std::vector<MBPUpdate> final_bids, final_asks;
 
