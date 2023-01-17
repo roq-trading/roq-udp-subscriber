@@ -14,8 +14,7 @@
 namespace roq {
 namespace udp_subscriber {
 
-class Gateway final : public server::Handler, public Snapshot::Handler, public Incremental::Handler {
- public:
+struct Gateway final : public server::Handler, public Snapshot::Handler, public Incremental::Handler {
   Gateway(server::Dispatcher &, Config const &, io::Context &);
 
  protected:

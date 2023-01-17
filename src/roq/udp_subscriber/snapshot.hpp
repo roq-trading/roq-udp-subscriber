@@ -20,8 +20,7 @@
 namespace roq {
 namespace udp_subscriber {
 
-class Snapshot final : public io::net::udp::Receiver::Handler, public Parser::Handler {
- public:
+struct Snapshot final : public io::net::udp::Receiver::Handler, public Parser::Handler {
   struct Handler {
     virtual void operator()(Trace<GatewaySettings> const &) = 0;
     virtual void operator()(Trace<StreamStatus> const &) = 0;

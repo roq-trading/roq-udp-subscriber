@@ -21,8 +21,7 @@
 namespace roq {
 namespace udp_subscriber {
 
-class Incremental final : public io::net::udp::Receiver::Handler, public Parser::Handler {
- public:
+struct Incremental final : public io::net::udp::Receiver::Handler, public Parser::Handler {
   struct Handler {
     virtual void operator()(Trace<GatewaySettings> const &) = 0;
     virtual void operator()(Trace<StreamStatus> const &) = 0;
