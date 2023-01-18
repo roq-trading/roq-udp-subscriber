@@ -187,8 +187,9 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
       shared_(event, true, [&]([[maybe_unused]] auto &market_by_price) {});
     } else {
       try {
-        auto create_update = [&](auto &bids, auto &asks, auto update_type, auto exchange_sequence) {
-          return MarketByPriceUpdate{
+        auto create_update =
+            [&](auto &bids, auto &asks, auto update_type, auto exchange_sequence) -> MarketByPriceUpdate {
+          return {
               .stream_id = stream_id_,
               .exchange = market_by_price_update.exchange,
               .symbol = market_by_price_update.symbol,
@@ -208,9 +209,7 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
           auto market_by_price_update_2 =
               create_update(bids, asks, UpdateType::INCREMENTAL, market_by_price_update.exchange_sequence);
           Trace event(trace_info, market_by_price_update_2);
-          shared_(
-              event, true, false, shared_.final_bids, shared_.final_asks, [&]([[maybe_unused]] auto &market_by_price) {
-              });
+          shared_(event, true, shared_.final_bids, shared_.final_asks, [&]([[maybe_unused]] auto &market_by_price) {});
         };
         auto publish_snapshot = [&](auto &bids, auto &asks, auto sequence) {
           log::debug(R"(PUBLISH SNAPSHOT symbol="{}", sequence={})"sv, symbol, sequence);
@@ -252,7 +251,7 @@ void Incremental::operator()(Trace<StatisticsUpdate> const &event, tools::Header
 void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, tools::Header const &header) {
   if (update(event, header)) {
     auto &[trace_info, value] = event;
-    CustomMetrics const custom_metrics{
+    auto custom_metrics = CustomMetrics{
         .label = value.label,
         .account = value.account,
         .exchange = value.exchange,
@@ -286,7 +285,7 @@ bool Incremental::update(Trace<T> const &event, tools::Header const &) {
 void Incremental::publish_stream_status(
     TraceInfo const &trace_info, Mask<SupportType> supports, ConnectionStatus connection_status) {
   if (utils::update(supports_, supports) || utils::update(connection_status_, connection_status)) {
-    StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = {},
         .supports = supports_,

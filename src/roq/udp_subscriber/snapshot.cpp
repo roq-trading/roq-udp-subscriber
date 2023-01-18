@@ -179,7 +179,7 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header
     try {
       auto publish_snapshot = [&](auto &bids, auto &asks, auto sequence) {
         log::debug(R"(PUBLISH SNAPSHOT symbol="{}", sequence={})"sv, symbol, sequence);
-        MarketByPriceUpdate market_by_price_update_2{
+        auto market_by_price_update_2 = MarketByPriceUpdate{
             .stream_id = stream_id_,
             .exchange = Flags::exchange(),
             .symbol = symbol,
@@ -224,7 +224,7 @@ void Snapshot::operator()(Trace<StatisticsUpdate> const &event, tools::Header co
 void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, tools::Header const &header) {
   if (update(event, header)) {
     auto &[trace_info, value] = event;
-    CustomMetrics const custom_metrics{
+    auto custom_metrics = CustomMetrics{
         .label = value.label,
         .account = value.account,
         .exchange = value.exchange,
@@ -256,7 +256,7 @@ bool Snapshot::update(Trace<T> const &event, tools::Header const &) {
 void Snapshot::publish_stream_status(
     TraceInfo const &trace_info, Mask<SupportType> supports, ConnectionStatus connection_status) {
   if (utils::update(supports_, supports) || utils::update(connection_status_, connection_status)) {
-    StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = {},
         .supports = supports_,
