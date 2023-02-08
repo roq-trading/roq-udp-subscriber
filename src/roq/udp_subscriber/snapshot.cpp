@@ -2,8 +2,6 @@
 
 #include "roq/udp_subscriber/snapshot.hpp"
 
-#include <arpa/inet.h>
-
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -25,11 +23,8 @@ namespace udp_subscriber {
 
 namespace {
 auto create_receiver_helper(auto &handler, auto &context, auto &address, auto port) {
-  std::string tmp{std::empty(address) ? "127.0.0.1"sv : address};  // note! default is localhost
-  struct in_addr localhost {
-    .s_addr = inet_addr(tmp.c_str()),
-  };
-  auto network_address = io::NetworkAddress{port, localhost};
+  auto address_2 = std::empty(address) ? "127.0.0.1"sv : address;  // note! default is localhost
+  auto network_address = io::NetworkAddress::create_blocking(address_2, port);
   auto socket_options = Mask{
       io::SocketOption::REUSE_ADDRESS,
   };
