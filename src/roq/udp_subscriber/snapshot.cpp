@@ -197,6 +197,7 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header
           market_by_price_update.bids,
           market_by_price_update.asks,
           header.last_seqno,  // note! last_seqno correlates with incremental
+          false,
           publish_snapshot,
           request_snapshot);
     } catch (BadState &) {
