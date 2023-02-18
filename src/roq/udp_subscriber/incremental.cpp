@@ -175,10 +175,10 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
     auto &trace_info = event.trace_info;
     auto &market_by_price_update = event.value;
     auto symbol = market_by_price_update.symbol;
-    auto &collector = shared_.mbp_collector[symbol];
+    auto &sequencer = shared_.mbp_sequencer[symbol];
     if (utils::is_snapshot(market_by_price_update.update_type)) {
       log::debug(R"(PUBLISH SNAPSHOT symbol="{}")"sv, symbol);
-      collector.initialize(header.seqno);
+      sequencer.initialize(header.seqno);
       shared_(event, true, [&]([[maybe_unused]] auto &market_by_price) {});
     } else {
       try {
@@ -208,14 +208,14 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
         };
         auto publish_snapshot = [&](auto &bids, auto &asks, auto sequence) {
           log::debug(R"(PUBLISH SNAPSHOT symbol="{}", sequence={})"sv, symbol, sequence);
-          auto market_by_price_update_2 = create_update(bids, asks, UpdateType::SNAPSHOT, collector.last_sequence());
+          auto market_by_price_update_2 = create_update(bids, asks, UpdateType::SNAPSHOT, sequencer.last_sequence());
           Trace event(trace_info, market_by_price_update_2);
-          shared_(event, true, [&](auto &market_by_price) { collector.apply(market_by_price, sequence, false); });
+          shared_(event, true, [&](auto &market_by_price) { sequencer.apply(market_by_price, sequence, false); });
         };
         auto request_snapshot = [&]([[maybe_unused]] auto retries) {
           // XXX ???
         };
-        collector(
+        sequencer(
             market_by_price_update.bids,
             market_by_price_update.asks,
             header.last_seqno + 1,
@@ -226,7 +226,7 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
             request_snapshot);
       } catch (BadState &) {
         log::warn(R"(RESUBSCRIBE symbol="{}")"sv, symbol);
-        collector.clear();
+        sequencer.clear();
         // XXX ???
       }
     }
