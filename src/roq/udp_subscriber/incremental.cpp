@@ -289,6 +289,10 @@ void Incremental::publish_stream_status(
         .encoding = {Encoding::FBS},
         .priority = Priority::PRIMARY,
         .connection_status = connection_status_,
+        .interface = {},
+        .authority = {},
+        .path = {},
+        .proxy = {},
     };
     create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
