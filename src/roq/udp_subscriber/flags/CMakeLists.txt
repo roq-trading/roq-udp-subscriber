@@ -30,7 +30,7 @@ roq_autogen(
   SOURCES
   ${AUTOGEN_SCHEMAS})
 
-add_library("${TARGET_NAME}" STATIC ${AUTOGEN_SOURCES})
+add_library("${TARGET_NAME}" OBJECT ${AUTOGEN_SOURCES})
 
 add_dependencies("${TARGET_NAME}" flags-autogen-headers)
 
