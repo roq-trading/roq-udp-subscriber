@@ -38,7 +38,7 @@ std::string Config::get_api_key(std::string_view const &account) const {
   return (*iter).second.login;
 }
 
-void Config::dispatch(server::config::Dispatcher::Handler &handler) const {
+void Config::dispatch(server::config::Handler &handler) const {
   handler(Flags::exchange());
   handler(symbols);
   for (auto &iter : accounts)
