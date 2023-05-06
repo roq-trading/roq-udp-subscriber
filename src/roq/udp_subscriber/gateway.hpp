@@ -54,8 +54,6 @@ struct Gateway final : public server::Handler, public Snapshot::Handler, public 
 
  private:
   server::Dispatcher &dispatcher_;
-  // io
-  io::Context &context_;
   // shared
   Shared shared_;
   // seed

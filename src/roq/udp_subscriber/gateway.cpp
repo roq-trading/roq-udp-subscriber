@@ -12,7 +12,7 @@ namespace roq {
 namespace udp_subscriber {
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &, io::Context &context)
-    : dispatcher_{dispatcher}, context_{context}, shared_{dispatcher}, snapshot_{*this, context, ++stream_id_, shared_},
+    : dispatcher_{dispatcher}, shared_{dispatcher}, snapshot_{*this, context, ++stream_id_, shared_},
       incremental_{*this, context, ++stream_id_, shared_} {
 }
 
