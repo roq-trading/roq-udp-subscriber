@@ -11,7 +11,7 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
-Gateway::Gateway(server::Dispatcher &dispatcher, Config const &, io::Context &context)
+Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &, Config const &, io::Context &context)
     : dispatcher_{dispatcher}, shared_{dispatcher}, snapshot_{*this, context, ++stream_id_, shared_},
       incremental_{*this, context, ++stream_id_, shared_} {
 }

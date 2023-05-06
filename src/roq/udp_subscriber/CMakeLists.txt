@@ -12,6 +12,7 @@ set(SOURCES
     incremental.cpp
     parser.cpp
     reader.cpp
+    settings.cpp
     shared.cpp
     snapshot.cpp
     main.cpp)

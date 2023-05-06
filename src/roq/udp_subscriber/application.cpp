@@ -4,6 +4,7 @@
 
 #include "roq/udp_subscriber/config.hpp"
 #include "roq/udp_subscriber/gateway.hpp"
+#include "roq/udp_subscriber/settings.hpp"
 
 using namespace std::literals;
 
@@ -13,20 +14,16 @@ namespace udp_subscriber {
 // === CONSTANTS ===
 
 namespace {
-auto const SETTINGS = server::Settings{
-    .package_name = ROQ_PACKAGE_NAME,
-    .build_number = ROQ_BUILD_NUMBER,
-    .api = {},
-    .type = server::Type::ORDER_MANAGEMENT,
-};
+auto const TYPE = server::Type::ORDER_MANAGEMENT;
 }  // namespace
 
 // === IMPLEMENTATION ===
 
 int Application::main(int, char **) {
+  auto settings = Settings::create(TYPE);
   Config config;
   auto context = server::create_io_context();
-  server::Router<Gateway>{SETTINGS, config, *context}.dispatch();
+  server::Router<Gateway>{settings, config, *context}.dispatch();
   return EXIT_SUCCESS;
 }
 

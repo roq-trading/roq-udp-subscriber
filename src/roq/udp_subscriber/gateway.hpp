@@ -8,6 +8,7 @@
 
 #include "roq/udp_subscriber/config.hpp"
 #include "roq/udp_subscriber/incremental.hpp"
+#include "roq/udp_subscriber/settings.hpp"
 #include "roq/udp_subscriber/shared.hpp"
 #include "roq/udp_subscriber/snapshot.hpp"
 
@@ -15,7 +16,7 @@ namespace roq {
 namespace udp_subscriber {
 
 struct Gateway final : public server::Handler, public Snapshot::Handler, public Incremental::Handler {
-  Gateway(server::Dispatcher &, Config const &, io::Context &);
+  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
  protected:
   void operator()(Event<Start> const &) override;
