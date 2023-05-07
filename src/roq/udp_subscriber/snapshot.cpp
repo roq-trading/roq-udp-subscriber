@@ -32,9 +32,9 @@ auto create_receiver_helper(auto &handler, auto &context, auto &address, auto po
   return receiver;
 }
 
-auto create_receivers(auto &handler, auto &context) {
-  auto address = server::Flags::udp_snapshot_address();
-  auto port = server::Flags::udp_snapshot_port();
+auto create_receivers(auto &handler, auto &settings, auto &context) {
+  auto address = settings.udp.snapshot_address;
+  auto port = settings.udp.snapshot_port;
   if (std::empty(port))
     log::fatal("Unexpected: port is missing"sv);
   if (std::size(port) > 1 && std::size(address) > 1 && std::size(port) != std::size(address))
@@ -54,7 +54,8 @@ auto create_receivers(auto &handler, auto &context) {
 // === IMPLEMENTATION ===
 
 Snapshot::Snapshot(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, shared_{shared}, receivers_{create_receivers(*this, context)} {
+    : handler_{handler}, stream_id_{stream_id}, shared_{shared},
+      receivers_{create_receivers(*this, shared.settings, context)} {
 }
 
 void Snapshot::operator()(Event<Start> const &) {

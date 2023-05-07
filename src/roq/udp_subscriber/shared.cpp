@@ -25,9 +25,9 @@ auto const SUPPORTS = Mask{
 
 // === IMPLEMENTATION ===
 
-Shared::Shared(server::Dispatcher &dispatcher)
-    : dispatcher_{dispatcher}, decoder{1024, 1024, 1024, 1024, 1024, 1024},
-      final_bids(server::Flags::cache_mbp_max_depth()), final_asks(server::Flags::cache_mbp_max_depth()) {
+Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
+    : dispatcher_{dispatcher}, settings{settings}, decoder{1024, 1024, 1024, 1024, 1024, 1024},
+      final_bids(settings.cache.mbp_max_depth), final_asks(settings.cache.mbp_max_depth) {
 }
 
 bool Shared::update(Mask<SupportType> value) {

@@ -16,11 +16,13 @@
 
 #include "roq/core/mbp/sequencer.hpp"
 
+#include "roq/udp_subscriber/settings.hpp"
+
 namespace roq {
 namespace udp_subscriber {
 
 struct Shared final {
-  explicit Shared(server::Dispatcher &);
+  explicit Shared(server::Dispatcher &, Settings const &);
 
   Shared(Shared &&) = default;
   Shared(Shared const &) = delete;
@@ -36,6 +38,8 @@ struct Shared final {
   server::Dispatcher &dispatcher_;
 
  public:
+  Settings const &settings;
+
   std::vector<Measurement> measurements;
 
   core::fbs::Decoder decoder;
