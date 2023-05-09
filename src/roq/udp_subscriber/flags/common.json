@@ -1,0 +1,13 @@
+{
+  "name": "Common",
+  "type": "flags",
+  "values": [
+    {
+      "name": "udp_heartbeat_timeout",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "10s",
+      "description": "heartbeat timeout"
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 #include "roq/udp_subscriber/settings.hpp"
 
+#include "roq/logging.hpp"
+
 #include "roq/udp_subscriber/flags/flags.hpp"
 
 using namespace std::literals;
@@ -9,9 +11,10 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
-Settings Settings::create(server::Type type) {
-  auto settings = server::create_settings(type, ROQ_PACKAGE_NAME, ROQ_BUILD_NUMBER);
-  return {settings};
+Settings::Settings(server::Type type)
+    : server::Settings{server::create_settings(type, ROQ_PACKAGE_NAME, ROQ_BUILD_NUMBER)},
+      exchange{flags::Flags::exchange()} {
+  log::debug("settings={}"sv, *this);
 }
 
 }  // namespace udp_subscriber

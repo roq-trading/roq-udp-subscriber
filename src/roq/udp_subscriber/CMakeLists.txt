@@ -7,7 +7,6 @@ set(SOURCES
     application.cpp
     config.cpp
     fbs_parser.cpp
-    flags.cpp
     gateway.cpp
     incremental.cpp
     parser.cpp

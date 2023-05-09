@@ -1,3 +1,6 @@
-# auto-generated
-flags.cpp
+!!! THIS FILE HAS BEEN AUTO-GENERATED !!!
+roq-udp-subscriber-flags
+common.hpp
 flags.hpp
+common.cpp
+flags.cpp

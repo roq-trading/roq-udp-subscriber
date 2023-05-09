@@ -2,7 +2,7 @@ set(TARGET_NAME "${PROJECT_NAME}-flags")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS flags.json)
+set(AUTOGEN_SCHEMAS common.json flags.json)
 
 roq_autogen(
   OUTPUT
@@ -29,6 +29,8 @@ roq_autogen(
   "cpp"
   SOURCES
   ${AUTOGEN_SCHEMAS})
+
+roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}" ${AUTOGEN_HEADERS} ${AUTOGEN_SOURCES})
 
 add_library("${TARGET_NAME}" OBJECT ${AUTOGEN_SOURCES})
 

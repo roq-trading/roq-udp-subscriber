@@ -12,8 +12,6 @@
 
 #include "roq/debug/hex/message.hpp"
 
-#include "roq/udp_subscriber/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -67,7 +65,7 @@ void Snapshot::operator()(Event<Stop> const &) {
 void Snapshot::operator()(Event<Timer> const &event) {
   if (!last_update_time_.count())
     return;
-  if ((last_update_time_ + flags::Flags::udp_heartbeat_timeout()) < event.value.now) {
+  if ((last_update_time_ + shared_.settings.common.udp_heartbeat_timeout) < event.value.now) {
     last_update_time_ = {};
     TraceInfo trace_info;
     publish_stream_status(trace_info, supports_, ConnectionStatus::DISCONNECTED);
@@ -177,7 +175,7 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header
         log::debug(R"(PUBLISH SNAPSHOT symbol="{}", sequence={})"sv, symbol, sequence);
         auto market_by_price_update_2 = MarketByPriceUpdate{
             .stream_id = stream_id_,
-            .exchange = Flags::exchange(),
+            .exchange = shared_.settings.exchange,
             .symbol = symbol,
             .bids = bids,
             .asks = asks,

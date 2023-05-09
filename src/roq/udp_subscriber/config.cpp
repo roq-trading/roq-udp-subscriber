@@ -6,8 +6,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/udp_subscriber/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -41,7 +39,8 @@ auto create_gateway_settings(auto &settings) -> GatewaySettings {
 
 // === IMPLEMENTATION ===
 
-Config::Config(Settings const &settings) : gateway_settings_{create_gateway_settings(settings)} {
+Config::Config(Settings const &settings)
+    : exchange_{settings.exchange}, gateway_settings_{create_gateway_settings(settings)} {
   server::config::Reader::parse_file(*this, settings);
   log::info<1>("config={}"sv, *this);
 }
@@ -58,7 +57,7 @@ std::string Config::get_api_key(std::string_view const &account) const {
 }
 
 void Config::dispatch(server::config::Handler &handler) const {
-  handler(Flags::exchange());
+  handler(exchange_);
   handler(symbols);
   for (auto &iter : accounts)
     handler(iter.second);

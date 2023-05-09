@@ -13,8 +13,6 @@
 
 #include "roq/debug/hex/message.hpp"
 
-#include "roq/udp_subscriber/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -68,7 +66,7 @@ void Incremental::operator()(Event<Stop> const &) {
 void Incremental::operator()(Event<Timer> const &event) {
   if (!last_update_time_.count())
     return;
-  if ((last_update_time_ + flags::Flags::udp_heartbeat_timeout()) < event.value.now) {
+  if ((last_update_time_ + shared_.settings.common.udp_heartbeat_timeout) < event.value.now) {
     last_update_time_ = {};
     TraceInfo trace_info;
     publish_stream_status(trace_info, supports_, ConnectionStatus::DISCONNECTED);

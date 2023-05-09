@@ -8,13 +8,6 @@
       "validator": "roq::core::flags::NonEmpty",
       "default": "sub",
       "description": "exchange identifier (string)"
-    },
-    {
-      "name": "udp_heartbeat_timeout",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "10s",
-      "description": "heartbeat timeout"
     }
   ]
 }

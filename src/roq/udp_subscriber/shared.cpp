@@ -4,8 +4,6 @@
 
 #include "roq/utils/update.hpp"
 
-#include "roq/udp_subscriber/flags.hpp"
-
 namespace roq {
 namespace udp_subscriber {
 
