@@ -23,15 +23,16 @@ requirements:
     - make
     - pkg-config
   host:
+    - abseil-cpp
+    - catch2  # [linux]
     - flatbuffers
+    - fmt
     - nlohmann_json
     - roq-core
-    - abseil-cpp
     - roq-oss-base64
     - roq-oss-benchmark
     - roq-oss-botan
     - roq-oss-brotli
-    - catch2  # [linux]
     - roq-oss-catch2  # [osx]
     - roq-oss-libsodium
     - roq-oss-libsodium
