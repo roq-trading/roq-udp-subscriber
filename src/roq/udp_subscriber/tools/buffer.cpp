@@ -15,7 +15,7 @@ namespace tools {
 
 namespace {
 auto const MAX_PAYLOAD = core::udp::MAX_PAYLOAD_LENGTH;
-auto const MAX_BUFFER = MAX_PAYLOAD *size_t{256};
+auto const MAX_BUFFER = MAX_PAYLOAD * size_t{256};
 auto const MAX_BUFFERS = size_t{16};
 }  // namespace
 
