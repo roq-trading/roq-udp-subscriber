@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <fmt/chrono.h>
 #include <fmt/compile.h>
 #include <fmt/format.h>
 
@@ -14,7 +13,7 @@ namespace roq {
 namespace udp_subscriber {
 
 struct Settings final : public server::flags::Settings {
-  explicit Settings(args::Parser const &, server::Type);
+  explicit Settings(args::Parser const &);
 
   std::string_view exchange;
 
