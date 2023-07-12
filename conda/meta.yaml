@@ -29,6 +29,7 @@ requirements:
     - fmt
     - nlohmann_json
     - roq-core
+    - roq-flags
     - roq-oss-base64
     - roq-oss-benchmark
     - roq-oss-botan
