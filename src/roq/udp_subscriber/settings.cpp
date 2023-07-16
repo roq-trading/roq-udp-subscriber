@@ -4,15 +4,14 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/udp_subscriber/flags/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
 namespace udp_subscriber {
 
 Settings::Settings(args::Parser const &args)
-    : server::flags::Settings{args, ROQ_PACKAGE_NAME, ROQ_BUILD_NUMBER}, exchange{flags::Flags::exchange()} {
+    : server::flags::Settings{args, ROQ_PACKAGE_NAME, ROQ_BUILD_NUMBER}, flags::Flags{flags::Flags::create()},
+      common{flags::Common::create()} {
   log::debug("settings={}"sv, *this);
 }
 
