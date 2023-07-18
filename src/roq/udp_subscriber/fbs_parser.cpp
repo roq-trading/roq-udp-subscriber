@@ -30,6 +30,7 @@ void FBSParser::dispatch_helper(
       overloaded{
           [](Event<DownloadBegin> const &) {},  // drop: client specific
           [](Event<DownloadEnd> const &) {},    // drop: client specific
+          [](Event<Ready> const &) {},          // drop: client specific
           [&](Event<GatewaySettings> const &event) { dispatch(handler, event, header); },
           [&](Event<StreamStatus> const &event) { dispatch(handler, event, header); },
           [&](Event<ExternalLatency> const &event) { dispatch(handler, event, header); },
