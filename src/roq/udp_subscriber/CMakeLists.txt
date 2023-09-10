@@ -26,6 +26,7 @@ target_link_libraries(
           roq-server::roq-server-flags
           roq-io::roq-io
           roq-core::roq-core
+          roq-utils::roq-utils
           roq-logging::roq-logging
           roq-logging::roq-logging-flags
           roq-flags::roq-flags

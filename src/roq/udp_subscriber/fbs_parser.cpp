@@ -8,7 +8,7 @@
 
 #include "roq/clock.hpp"
 
-#include "roq/core/patterns.hpp"
+#include "roq/utils/patterns.hpp"
 
 using namespace std::literals;
 
@@ -27,7 +27,7 @@ void FBSParser::dispatch_helper(
   auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
   // log::debug("message_info={}"sv, message_info);
   shared.decoder.dispatch(
-      overloaded{
+      utils::overloaded{
           [](Event<DownloadBegin> const &) {},  // drop: client specific
           [](Event<DownloadEnd> const &) {},    // drop: client specific
           [](Event<Ready> const &) {},          // drop: client specific

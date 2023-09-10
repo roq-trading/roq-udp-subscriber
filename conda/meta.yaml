@@ -24,6 +24,7 @@ requirements:
     - pkg-config
   host:
     - abseil-cpp
+    - brotli
     - catch2  # [linux]
     - flatbuffers
     - fmt
@@ -33,7 +34,6 @@ requirements:
     - roq-oss-base64
     - roq-oss-benchmark
     - roq-oss-botan
-    - brotli
     - roq-oss-catch2  # [osx]
     - roq-oss-libsodium
     - roq-oss-libsodium
@@ -42,6 +42,7 @@ requirements:
     - roq-oss-tomlplusplus
     - roq-oss-zlib-ng
     - roq-server
+    - roq-utils
 
 about:
   home: https://roq-trading.com
