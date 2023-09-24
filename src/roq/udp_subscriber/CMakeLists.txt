@@ -32,8 +32,8 @@ target_link_libraries(
           ${PROJECT_NAME}-tools
           roq-server::roq-server
           roq-server::roq-server-flags
-          roq-io::roq-io
           roq-core::roq-core
+          roq-io::roq-io
           roq-utils::roq-utils
           roq-logging::roq-logging
           roq-logging::roq-logging-flags

@@ -6,7 +6,8 @@ add_executable(${TARGET_NAME} ${SOURCES})
 
 target_link_libraries(
   ${TARGET_NAME}
-  PRIVATE roq-server::roq-server
+  PRIVATE ${PROJECT_NAME}-tools
+          roq-server::roq-server
           roq-core::roq-core
           roq-io::roq-io
           fmt::fmt
