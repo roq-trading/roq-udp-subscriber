@@ -37,7 +37,6 @@ requirements:
     - roq-oss-botan
     - roq-oss-catch2  # [osx]
     - roq-oss-libsodium
-    - roq-oss-libsodium
     - roq-oss-magic_enum
     - roq-oss-re2
     - roq-oss-tomlplusplus
