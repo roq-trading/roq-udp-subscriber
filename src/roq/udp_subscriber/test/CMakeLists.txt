@@ -12,7 +12,6 @@ target_link_libraries(
           roq-io::roq-io
           roq-utils::roq-utils
           fmt::fmt
-          ${PROJECT_NAME}-tools
           Catch2::Catch2
           ${RT_LIBRARIES})
 
