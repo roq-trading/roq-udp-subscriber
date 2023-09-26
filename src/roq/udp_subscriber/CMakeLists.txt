@@ -42,8 +42,6 @@ target_link_libraries(
           fmt::fmt
           absl::flat_hash_map
           absl::flat_hash_set
-          aklomp::base64
-          ${UUID_LIBRARIES}
           ${RT_LIBRARIES})
 
 if(ROQ_BUILD_TYPE STREQUAL "Release")

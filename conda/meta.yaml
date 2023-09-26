@@ -28,19 +28,14 @@ requirements:
     - catch2  # [linux]
     - flatbuffers
     - fmt
-    - nlohmann_json
     - roq-core
     - roq-flags
     - roq-io
-    - roq-oss-base64
     - roq-oss-benchmark
-    - roq-oss-botan
     - roq-oss-catch2  # [osx]
     - roq-oss-libsodium
     - roq-oss-magic_enum
-    - roq-oss-re2
     - roq-oss-tomlplusplus
-    - roq-oss-zlib-ng
     - roq-server
     - roq-utils
 
