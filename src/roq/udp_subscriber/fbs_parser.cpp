@@ -43,16 +43,17 @@ void FBSParser::dispatch_helper(
           [](Event<MarketByOrderUpdate> const &) {},  // ???
           [&](Event<TradeSummary> const &event) { dispatch(handler, event, header); },
           [&](Event<StatisticsUpdate> const &event) { dispatch(handler, event, header); },
-          [](Event<CreateOrder> const &) {},      // drop: server specific
-          [](Event<ModifyOrder> const &) {},      // drop: server specific
-          [](Event<CancelOrder> const &) {},      // drop: server specific
-          [](Event<CancelAllOrders> const &) {},  // drop: server specific
-          [](Event<OrderAck> const &) {},         // drop: client specific
-          [](Event<OrderUpdate> const &) {},      // drop: client specific
-          [](Event<TradeUpdate> const &) {},      // drop: client specific
-          [](Event<PositionUpdate> const &) {},   // ???
-          [](Event<FundsUpdate> const &) {},      // ???
-          [](Event<CustomMetrics> const &) {},    // drop: internal
+          [](Event<CreateOrder> const &) {},         // drop: server specific
+          [](Event<ModifyOrder> const &) {},         // drop: server specific
+          [](Event<CancelOrder> const &) {},         // drop: server specific
+          [](Event<CancelAllOrders> const &) {},     // drop: server specific
+          [](Event<CancelAllOrdersAck> const &) {},  // drop: server specific
+          [](Event<OrderAck> const &) {},            // drop: client specific
+          [](Event<OrderUpdate> const &) {},         // drop: client specific
+          [](Event<TradeUpdate> const &) {},         // drop: client specific
+          [](Event<PositionUpdate> const &) {},      // ???
+          [](Event<FundsUpdate> const &) {},         // ???
+          [](Event<CustomMetrics> const &) {},       // drop: internal
           [&](Event<CustomMetricsUpdate> const &event) { dispatch(handler, event, header); },
           [](Event<CustomMatrix> const &) {},        // drop: internal
           [](Event<CustomMatrixUpdate> const &) {},  // drop: not supported
