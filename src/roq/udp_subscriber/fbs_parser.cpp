@@ -58,6 +58,7 @@ void FBSParser::dispatch_helper(
           [](Event<CustomMatrix> const &) {},        // drop: internal
           [](Event<CustomMatrixUpdate> const &) {},  // drop: not supported
           [](Event<ParametersUpdate> const &) {},    // drop: client specific
+          [](Event<Portfolio> const &) {},           // drop: client specific
           [](Event<PortfolioUpdate> const &) {},     // drop: client specific
           [](Event<RiskLimits> const &) {},          // drop: client specific
           [](Event<RiskLimitsUpdate> const &) {},    // drop: client specific
