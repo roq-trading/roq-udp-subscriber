@@ -11,6 +11,9 @@ build:
   script_env:
     - ROQ_BUILD_NUMBER
     - ROQ_BUILD_TYPE
+    - CFLAGS=-O3
+    - CPPFLAGS=-O3  # [linux]
+    - CPPFLAGS=-O3 -D_LIBCPP_DISABLE_AVAILABILITY  # [osx]
   run_exports:
     - {{ pin_subpackage('roq-udp-subscriber', max_pin='x.x.x') }}
 
@@ -28,12 +31,12 @@ requirements:
     - catch2  # [linux]
     - flatbuffers
     - fmt
+    - libsodium
     - roq-core
     - roq-flags
     - roq-io
     - roq-oss-benchmark
     - roq-oss-catch2  # [osx]
-    - libsodium
     - roq-oss-magic_enum
     - roq-oss-tomlplusplus
     - roq-server
