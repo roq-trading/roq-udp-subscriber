@@ -205,8 +205,13 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
           Trace event(trace_info, market_by_price_update_2);
           shared_(event, true, shared_.final_bids, shared_.final_asks, [&]([[maybe_unused]] auto &market_by_price) {});
         };
-        auto publish_snapshot = [&](auto &bids, auto &asks, auto sequence) {
-          log::debug(R"(PUBLISH SNAPSHOT symbol="{}", sequence={})"sv, symbol, sequence);
+        auto publish_snapshot = [&](auto &bids, auto &asks, auto sequence, auto retries, auto delay) {
+          log::debug(
+              R"(PUBLISH SNAPSHOT symbol="{}", sequence={}, retries={}, delay={})"sv,
+              symbol,
+              sequence,
+              retries,
+              std::chrono::duration_cast<std::chrono::milliseconds>(delay));
           auto market_by_price_update_2 = create_update(bids, asks, UpdateType::SNAPSHOT, sequencer.last_sequence());
           Trace event(trace_info, market_by_price_update_2);
           shared_(event, true, [&](auto &market_by_price) { sequencer.apply(market_by_price, sequence, false); });

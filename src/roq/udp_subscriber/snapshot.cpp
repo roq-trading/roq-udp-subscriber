@@ -171,8 +171,13 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header
     auto symbol = market_by_price_update.symbol;
     auto &sequencer = shared_.mbp_sequencer[symbol];
     try {
-      auto publish_snapshot = [&](auto &bids, auto &asks, auto sequence) {
-        log::debug(R"(PUBLISH SNAPSHOT symbol="{}", sequence={})"sv, symbol, sequence);
+      auto publish_snapshot = [&](auto &bids, auto &asks, auto sequence, auto retries, auto delay) {
+        log::debug(
+            R"(PUBLISH SNAPSHOT symbol="{}", sequence={}, retries={}, delay={})"sv,
+            symbol,
+            sequence,
+            retries,
+            std::chrono::duration_cast<std::chrono::milliseconds>(delay));
         auto market_by_price_update_2 = MarketByPriceUpdate{
             .stream_id = stream_id_,
             .exchange = shared_.settings.exchange,
