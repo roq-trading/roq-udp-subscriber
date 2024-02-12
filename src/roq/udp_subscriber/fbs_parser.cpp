@@ -31,6 +31,7 @@ void FBSParser::dispatch_helper(
           [&](Event<GatewaySettings> const &event) { dispatch(handler, event, header); },
           [&](Event<StreamStatus> const &event) { dispatch(handler, event, header); },
           [&](Event<ExternalLatency> const &event) { dispatch(handler, event, header); },
+          [](Event<RateLimitsUpdate> const &) {},  // drop: order management
           [](Event<RateLimitTrigger> const &) {},  // drop: order management
           [&](Event<GatewayStatus> const &event) { dispatch(handler, event, header); },
           [&](Event<ReferenceData> const &event) { dispatch(handler, event, header); },
