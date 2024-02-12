@@ -11,8 +11,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/debug/hex/message.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -198,7 +196,6 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
           };
         };
         auto publish_update = [&](auto &bids, auto &asks) {
-          // log::debug(R"(PUBLISH UPDATE symbol="{}")"sv, symbol);
           log::debug("bids=[{}], asks=[{}]"sv, fmt::join(bids, ", "sv), fmt::join(asks, ", "sv));
           auto market_by_price_update_2 =
               create_update(bids, asks, UpdateType::INCREMENTAL, market_by_price_update.exchange_sequence);

@@ -2,8 +2,6 @@
 
 #include "roq/udp_subscriber/fbs_parser.hpp"
 
-#include "roq/debug/hex/message.hpp"
-
 #include "roq/logging.hpp"
 
 #include "roq/clock.hpp"
@@ -25,7 +23,6 @@ void FBSParser::dispatch_helper(
     tools::Header const &header) {
   auto event = core::fbs::Decoder::create_event(payload);
   auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
-  // log::debug("message_info={}"sv, message_info);
   shared.decoder.dispatch(
       utils::overloaded{
           [](Event<DownloadBegin> const &) {},  // drop: client specific

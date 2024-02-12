@@ -10,8 +10,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/debug/hex/message.hpp"
-
 using namespace std::literals;
 
 namespace roq {
