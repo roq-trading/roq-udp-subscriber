@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <absl/container/node_hash_map.h>
-
 #include <chrono>
 #include <deque>
 #include <string>
@@ -11,6 +9,8 @@
 
 #include "roq/api.hpp"
 #include "roq/server.hpp"
+
+#include "roq/utils/container.hpp"
 
 #include "roq/core/fbs/decoder.hpp"
 
@@ -50,9 +50,9 @@ struct Shared final {
     bool ready = false;
     std::optional<uint32_t> last_seqno = {};
   };
-  absl::node_hash_map<std::pair<uint8_t, uint16_t>, State> state;
+  utils::unordered_map<std::pair<uint8_t, uint16_t>, State> state;
 
-  absl::flat_hash_map<Symbol, market::mbp::Sequencer> mbp_sequencer;
+  utils::unordered_map<std::string, market::mbp::Sequencer> mbp_sequencer;
 
   std::vector<MBPUpdate> final_bids, final_asks;
 
