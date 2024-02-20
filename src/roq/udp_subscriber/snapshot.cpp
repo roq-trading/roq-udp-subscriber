@@ -185,8 +185,8 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header
             .update_type = UpdateType::SNAPSHOT,
             .exchange_time_utc = {},
             .exchange_sequence = sequencer.last_sequence(),
-            .price_decimals = {},
-            .quantity_decimals = {},
+            .price_precision = {},
+            .quantity_precision = {},
             .checksum = {},
         };
         Trace event(trace_info, market_by_price_update_2);

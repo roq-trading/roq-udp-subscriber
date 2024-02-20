@@ -190,8 +190,8 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
               .update_type = update_type,
               .exchange_time_utc = market_by_price_update.exchange_time_utc,
               .exchange_sequence = exchange_sequence,
-              .price_decimals = market_by_price_update.price_decimals,
-              .quantity_decimals = market_by_price_update.price_decimals,
+              .price_precision = market_by_price_update.price_precision,
+              .quantity_precision = market_by_price_update.price_precision,
               .checksum = market_by_price_update.checksum,
           };
         };
