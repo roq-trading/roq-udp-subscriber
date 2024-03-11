@@ -7,7 +7,7 @@
       "type": "std::string",
       "required": true,
       "default": "sub",
-      "description": "exchange identifier (string)"
+      "description": "Exchange identifier"
     }
   ]
 }
