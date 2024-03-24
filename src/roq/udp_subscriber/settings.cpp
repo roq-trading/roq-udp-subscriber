@@ -11,7 +11,7 @@ namespace udp_subscriber {
 
 Settings::Settings(args::Parser const &args)
     : server::flags::Settings{args, ROQ_PACKAGE_NAME, ROQ_BUILD_NUMBER}, flags::Flags{flags::Flags::create()},
-      common{flags::Common::create()} {
+      misc{flags::Misc::create()} {
   log::info("settings={}"sv, *this);
 }
 

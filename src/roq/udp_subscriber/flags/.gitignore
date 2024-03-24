@@ -1,8 +1,8 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-udp-subscriber-flags
 flags.rstinc
-common.rstinc
+misc.rstinc
 flags.hpp
-common.hpp
+misc.hpp
 flags.cpp
-common.cpp
+misc.cpp

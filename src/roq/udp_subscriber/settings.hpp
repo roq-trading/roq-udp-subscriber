@@ -6,8 +6,8 @@
 
 #include "roq/server/flags/settings.hpp"
 
-#include "roq/udp_subscriber/flags/common.hpp"
 #include "roq/udp_subscriber/flags/flags.hpp"
+#include "roq/udp_subscriber/flags/misc.hpp"
 
 namespace roq {
 namespace udp_subscriber {
@@ -15,7 +15,7 @@ namespace udp_subscriber {
 struct Settings final : public server::flags::Settings, public flags::Flags {
   explicit Settings(args::Parser const &);
 
-  flags::Common common;
+  flags::Misc misc;
 };
 
 }  // namespace udp_subscriber
@@ -30,11 +30,11 @@ struct fmt::formatter<roq::udp_subscriber::Settings> {
         context.out(),
         R"({{)"
         R"(exchange="{}", )"
-        R"(common={}, )"
+        R"(misc={}, )"
         R"(server={})"
         R"(}})"sv,
         value.exchange,
-        value.common,
+        value.misc,
         static_cast<roq::server::Settings const &>(value));
   }
 };

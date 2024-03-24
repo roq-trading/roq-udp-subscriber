@@ -4,7 +4,7 @@ include(RoqAutogen)
 
 set(NAMESPACE "roq/udp_subscriber/flags")
 
-set(AUTOGEN_SCHEMAS flags.json common.json)
+set(AUTOGEN_SCHEMAS flags.json misc.json)
 
 if(BUILD_DOCS)
 
