@@ -50,8 +50,7 @@ auto create_receivers(auto &handler, auto &settings, auto &context) {
 // === IMPLEMENTATION ===
 
 Snapshot::Snapshot(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, shared_{shared},
-      receivers_{create_receivers(*this, shared.settings, context)} {
+    : handler_{handler}, stream_id_{stream_id}, shared_{shared}, receivers_{create_receivers(*this, shared.settings, context)} {
 }
 
 void Snapshot::operator()(Event<Start> const &) {
@@ -102,10 +101,7 @@ void Snapshot::operator()(io::net::udp::Receiver::Read const &read) {
       state.last_seqno = header.last_seqno;  // note! last_seqno is from the incremental channel
       if (header.object_type != 0x0) {
         log::info<4>(
-            R"(+++ OBJECT READY +++ (object_type=\x{:02x}, object_id=\x{:04x}, last_seqno={}))"sv,
-            header.object_type,
-            header.object_id,
-            *state.last_seqno);
+            R"(+++ OBJECT READY +++ (object_type=\x{:02x}, object_id=\x{:04x}, last_seqno={}))"sv, header.object_type, header.object_id, *state.last_seqno);
       }
       // parse
       auto bytes = Parser::dispatch(*this, header, payload, trace_info, shared_);
@@ -251,8 +247,7 @@ bool Snapshot::update(Trace<T> const &event, tools::Header const &) {
   return true;
 }
 
-void Snapshot::publish_stream_status(
-    TraceInfo const &trace_info, Mask<SupportType> supports, ConnectionStatus connection_status) {
+void Snapshot::publish_stream_status(TraceInfo const &trace_info, Mask<SupportType> supports, ConnectionStatus connection_status) {
   if (utils::update(supports_, supports) || utils::update(connection_status_, connection_status)) {
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,

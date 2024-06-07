@@ -16,11 +16,7 @@ namespace udp_subscriber {
 // === IMPLEMENTATION ===
 
 void FBSParser::dispatch_helper(
-    Handler &handler,
-    std::span<std::byte const> const &payload,
-    [[maybe_unused]] TraceInfo const &,
-    Shared &shared,
-    tools::Header const &header) {
+    Handler &handler, std::span<std::byte const> const &payload, [[maybe_unused]] TraceInfo const &, Shared &shared, tools::Header const &header) {
   auto event = core::fbs::Decoder::create_event(payload);
   auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
   shared.decoder.dispatch(

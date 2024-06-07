@@ -13,12 +13,7 @@ namespace udp_subscriber {
 
 // === IMPLEMENTATION ===
 
-size_t Parser::dispatch(
-    Handler &handler,
-    tools::Header const &header,
-    std::span<std::byte const> const &payload,
-    TraceInfo const &trace_info,
-    Shared &shared) {
+size_t Parser::dispatch(Handler &handler, tools::Header const &header, std::span<std::byte const> const &payload, TraceInfo const &trace_info, Shared &shared) {
   if (!std::empty(payload)) {
     auto ok = false;
     switch (header.encoding) {

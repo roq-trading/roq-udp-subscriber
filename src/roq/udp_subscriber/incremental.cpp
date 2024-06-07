@@ -51,8 +51,7 @@ auto create_receivers(auto &handler, auto &settings, auto &context) {
 // === IMPLEMENTATION ===
 
 Incremental::Incremental(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, shared_{shared},
-      receivers_{create_receivers(*this, shared.settings, context)} {
+    : handler_{handler}, stream_id_{stream_id}, shared_{shared}, receivers_{create_receivers(*this, shared.settings, context)} {
 }
 
 void Incremental::operator()(Event<Start> const &) {
@@ -96,10 +95,7 @@ void Incremental::operator()(io::net::udp::Receiver::Read const &read) {
         state.last_seqno = header.seqno;
         if (header.object_type != 0x0) {
           log::info<4>(
-              R"(+++ OBJECT READY +++ (object_type=\x{:02x}, object_id=\x{:04x}, last_seqno={}))"sv,
-              header.object_type,
-              header.object_id,
-              *state.last_seqno);
+              R"(+++ OBJECT READY +++ (object_type=\x{:02x}, object_id=\x{:04x}, last_seqno={}))"sv, header.object_type, header.object_id, *state.last_seqno);
         }
       } else {
         if (!state.last_seqno.has_value()) {  // wait for snapshot
@@ -179,8 +175,7 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
       shared_(event, true, [&]([[maybe_unused]] auto &market_by_price) {});
     } else {
       try {
-        auto create_update =
-            [&](auto &bids, auto &asks, auto update_type, auto exchange_sequence) -> MarketByPriceUpdate {
+        auto create_update = [&](auto &bids, auto &asks, auto update_type, auto exchange_sequence) -> MarketByPriceUpdate {
           return {
               .stream_id = stream_id_,
               .exchange = market_by_price_update.exchange,
@@ -197,8 +192,7 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
         };
         auto publish_update = [&](auto &bids, auto &asks) {
           log::debug("bids=[{}], asks=[{}]"sv, fmt::join(bids, ", "sv), fmt::join(asks, ", "sv));
-          auto market_by_price_update_2 =
-              create_update(bids, asks, UpdateType::INCREMENTAL, market_by_price_update.exchange_sequence);
+          auto market_by_price_update_2 = create_update(bids, asks, UpdateType::INCREMENTAL, market_by_price_update.exchange_sequence);
           Trace event(trace_info, market_by_price_update_2);
           shared_(event, true, shared_.final_bids, shared_.final_asks, [&]([[maybe_unused]] auto &market_by_price) {});
         };
@@ -278,8 +272,7 @@ bool Incremental::update(Trace<T> const &event, tools::Header const &) {
   return true;
 }
 
-void Incremental::publish_stream_status(
-    TraceInfo const &trace_info, Mask<SupportType> supports, ConnectionStatus connection_status) {
+void Incremental::publish_stream_status(TraceInfo const &trace_info, Mask<SupportType> supports, ConnectionStatus connection_status) {
   if (utils::update(supports_, supports) || utils::update(connection_status_, connection_status)) {
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,

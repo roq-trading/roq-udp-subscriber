@@ -31,8 +31,7 @@ struct Parser {
     virtual void operator()(Trace<CustomMetricsUpdate> const &, tools::Header const &) = 0;
   };
 
-  static size_t dispatch(
-      Handler &, tools::Header const &, std::span<std::byte const> const &payload, TraceInfo const &, Shared &);
+  static size_t dispatch(Handler &, tools::Header const &, std::span<std::byte const> const &payload, TraceInfo const &, Shared &);
 };
 
 }  // namespace udp_subscriber

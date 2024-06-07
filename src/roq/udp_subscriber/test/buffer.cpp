@@ -59,8 +59,7 @@ TEST_CASE("simple", "[buffer]") {
   REQUIRE(count == 1);
   // gap
   count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(4), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(4), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
   // re-ordered
   count = 0;
@@ -94,8 +93,7 @@ TEST_CASE("simple_fragmented", "[buffer]") {
   Buffer buffer;
   // initialize
   size_t count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(1, 0, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(1, 0, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
   REQUIRE(buffer(create_frame(1, 1, 1), payload, [&](auto &header, [[maybe_unused]] auto &payload) {
     ++count;
@@ -105,8 +103,7 @@ TEST_CASE("simple_fragmented", "[buffer]") {
   REQUIRE(count == 1);
   // reordered fragments
   count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(2, 1, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(2, 1, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
   REQUIRE(buffer(create_frame(2, 0, 1), payload, [&](auto &header, [[maybe_unused]] auto &payload) {
     ++count;
@@ -116,17 +113,14 @@ TEST_CASE("simple_fragmented", "[buffer]") {
   REQUIRE(count == 1);
   // gap
   count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(4, 0, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(4, 0, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
   count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(4, 1, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(4, 1, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
   // re-ordered
   count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(3, 0, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(3, 0, 1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
   count = 0;
   REQUIRE(buffer(create_frame(3, 1, 1), payload, [&](auto &header, [[maybe_unused]] auto &payload) {
@@ -166,8 +160,7 @@ TEST_CASE("replay", "[buffer]") {
   REQUIRE(count == 1);
   // replay
   count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(1), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
   // normal #1
   count = 0;
@@ -187,13 +180,11 @@ TEST_CASE("replay", "[buffer]") {
   REQUIRE(count == 1);
   // replay #1
   count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(2), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(2), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
   // replay #2
   count = 0;
-  REQUIRE_FALSE(buffer(
-      create_frame(3), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+  REQUIRE_FALSE(buffer(create_frame(3), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
   REQUIRE(count == 0);
 }
 
@@ -220,8 +211,7 @@ TEST_CASE("bug", "[buffer]") {
   // lost #3
   for (uint32_t seqno = 4; seqno < 19; ++seqno) {
     count = 0;
-    REQUIRE_FALSE(buffer(
-        create_frame(seqno), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
+    REQUIRE_FALSE(buffer(create_frame(seqno), payload, [&]([[maybe_unused]] auto &header, [[maybe_unused]] auto &payload) { ++count; }));
     REQUIRE(count == 0);
   }
   // overflow
