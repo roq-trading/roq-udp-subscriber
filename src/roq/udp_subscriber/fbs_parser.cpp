@@ -37,6 +37,7 @@ void FBSParser::dispatch_helper(
           [](Event<MarketByOrderUpdate> const &) {},  // ???
           [&](Event<TradeSummary> const &event) { dispatch(handler, event, header); },
           [&](Event<StatisticsUpdate> const &event) { dispatch(handler, event, header); },
+          [](Event<TimeSeriesUpdate> const &) {},    // drop: server specific
           [](Event<CreateOrder> const &) {},         // drop: server specific
           [](Event<ModifyOrder> const &) {},         // drop: server specific
           [](Event<CancelOrder> const &) {},         // drop: server specific
