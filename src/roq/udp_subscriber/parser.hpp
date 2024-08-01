@@ -16,6 +16,7 @@ namespace udp_subscriber {
 
 struct Parser {
   struct Heartbeat final {};
+
   struct Handler {
     virtual void operator()(Trace<Heartbeat> const &, tools::Header const &) = 0;
     virtual void operator()(Trace<GatewaySettings> const &, tools::Header const &) = 0;

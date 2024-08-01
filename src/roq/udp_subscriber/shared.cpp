@@ -23,8 +23,7 @@ auto const SUPPORTS = Mask{
 
 // === IMPLEMENTATION ===
 
-Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
-    : dispatcher_{dispatcher}, settings{settings}, decoder{1024, 1024, 1024, 1024, 1024, 1024} {
+Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings) : dispatcher_{dispatcher}, settings{settings} {
 }
 
 bool Shared::update(Mask<SupportType> value) {

@@ -11,6 +11,8 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
+// === IMPLEMENTATION ===
+
 Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &, io::Context &context)
     : dispatcher_{dispatcher}, shared_{dispatcher, settings}, snapshot_{*this, context, ++stream_id_, shared_},
       incremental_{*this, context, ++stream_id_, shared_} {

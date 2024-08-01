@@ -30,7 +30,7 @@ size_t Parser::dispatch(Handler &handler, tools::Header const &header, std::span
     if (!ok)
       log::warn("Unexpected: header={}"sv, header);
   } else {
-    Heartbeat const heartbeat{};
+    auto heartbeat = Heartbeat{};
     create_trace_and_dispatch(handler, trace_info, heartbeat, header);
   }
   return std::size(payload);

@@ -12,10 +12,13 @@ namespace udp_subscriber {
 struct Reader final {
   Reader();
 
-  template <typename Receiver, typename Callback>
-  bool recv(Receiver &receiver, Callback callback) {
+  Reader(Reader &&) = default;
+  Reader(Reader const &) = delete;
+
+  template <typename Callback>
+  bool recv(auto &receiver, Callback callback) {
     auto bytes = receiver.recv(buffer_);
-    auto message = std::span{std::data(buffer_), bytes};
+    std::span message{std::data(buffer_), bytes};
     if (validate(message)) {
       auto &frame = *reinterpret_cast<core::udp::Frame const *>(std::data(message));
       auto payload = message.subspan(sizeof(frame));

@@ -12,7 +12,7 @@ namespace udp_subscriber {
 // === CONSTANTS ===
 
 namespace {
-auto const BUFFER_LENGTH = size_t{4096};
+size_t const BUFFER_LENGTH = 4096;
 }
 
 // === IMPLEMENTATION ===

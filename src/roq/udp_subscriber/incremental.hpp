@@ -37,6 +37,9 @@ struct Incremental final : public io::net::udp::Receiver::Handler, public Parser
 
   Incremental(Handler &, io::Context &, uint16_t stream_id, Shared &);
 
+  Incremental(Incremental &&) = default;
+  Incremental(Incremental const &) = delete;
+
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
   void operator()(Event<Timer> const &);

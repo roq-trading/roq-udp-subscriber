@@ -13,10 +13,12 @@ namespace roq {
 namespace udp_subscriber {
 namespace tools {
 
+// === CONSTANTS ===
+
 namespace {
-auto const MAX_PAYLOAD = core::udp::MAX_PAYLOAD_LENGTH;
-auto const MAX_BUFFER = MAX_PAYLOAD * size_t{256};
-auto const MAX_BUFFERS = size_t{16};
+size_t const MAX_PAYLOAD = core::udp::MAX_PAYLOAD_LENGTH;
+size_t const MAX_BUFFER = MAX_PAYLOAD * 256;
+size_t const MAX_BUFFERS = 16;
 }  // namespace
 
 Buffer::Buffer() : assembly_(MAX_BUFFERS) {

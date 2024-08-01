@@ -24,6 +24,9 @@ namespace udp_subscriber {
 struct Config final : public server::config::Dispatcher, public server::config::Reader::Handler {
   explicit Config(Settings const &);
 
+  Config(Config &&) = default;
+  Config(Config const &) = delete;
+
   std::string get_master_account() const;
 
   std::string get_api_key(std::string_view const &account) const;
@@ -51,17 +54,6 @@ struct Config final : public server::config::Dispatcher, public server::config::
   std::string master_account_;
   server::config::RateLimits rate_limits;
 };
-
-/*
- * REST API
- * https://api-public.sandbox.pro.udp_subscriber.com
- *
- * Websocket Feed
- * wss://ws-feed-public.sandbox.pro.udp_subscriber.com
- *
- * FIX API
- * tcp+ssl://fix-public.sandbox.pro.udp_subscriber.com:4198
- */
 
 }  // namespace udp_subscriber
 }  // namespace roq

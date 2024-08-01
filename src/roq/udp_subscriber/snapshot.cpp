@@ -15,30 +15,47 @@ using namespace std::literals;
 namespace roq {
 namespace udp_subscriber {
 
+// === constants ===
+
+namespace {
+auto const LOCALHOST = "127.0.0.1"sv;
+
+auto const SOCKET_OPTIONS = Mask{
+    io::SocketOption::REUSE_ADDRESS,
+};
+}  // namespace
+
 // === HELPERS ===
 
 namespace {
 auto create_receiver_helper(auto &handler, auto &context, auto &address, auto port) {
-  auto address_2 = std::empty(address) ? "127.0.0.1"sv : address;  // note! default is localhost
+  auto address_2 = [&]() -> std::string_view {
+    if (std::empty(address))
+      return LOCALHOST;  // note! default is localhost
+    return address;
+  }();
   auto network_address = io::NetworkAddress::create_blocking(address_2, port);
-  auto socket_options = Mask{
-      io::SocketOption::REUSE_ADDRESS,
-  };
-  auto receiver = context.create_udp_receiver(handler, network_address, socket_options);
+  auto receiver = context.create_udp_receiver(handler, network_address, SOCKET_OPTIONS);
   return receiver;
 }
 
+template <typename T>
 auto create_receivers(auto &handler, auto &settings, auto &context) {
+  using result_type = std::remove_cvref<T>::type;
+  result_type result;
   auto address = settings.udp.snapshot_address;
   auto port = settings.udp.snapshot_port;
   if (std::empty(port))
     log::fatal("Unexpected: port is missing"sv);
   if (std::size(port) > 1 && std::size(address) > 1 && std::size(port) != std::size(address))
     log::fatal("Unexpected: mismatched length of address and port"sv);
-  std::vector<std::unique_ptr<io::net::udp::Receiver>> result;
   auto length = std::max(std::size(address), std::size(port));
   for (size_t i = 0; i < length; ++i) {
-    auto address_ = std::empty(address) ? std::string{} : address[std::min(i, std::size(address) - 1)];
+    auto address_ = [&]() -> std::string {
+      if (std::empty(address))
+        return {};
+      return address[std::min(i, std::size(address) - 1)];
+    }();
     auto port_ = port[std::min(i, std::size(port) - 1)];
     auto sender = create_receiver_helper(handler, context, address_, port_);
     result.emplace_back(std::move(sender));
@@ -50,7 +67,7 @@ auto create_receivers(auto &handler, auto &settings, auto &context) {
 // === IMPLEMENTATION ===
 
 Snapshot::Snapshot(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, shared_{shared}, receivers_{create_receivers(*this, shared.settings, context)} {
+    : handler_{handler}, stream_id_{stream_id}, shared_{shared}, receivers_{create_receivers<decltype(receivers_)>(*this, shared.settings, context)} {
 }
 
 void Snapshot::operator()(Event<Start> const &) {
@@ -109,10 +126,11 @@ void Snapshot::operator()(io::net::udp::Receiver::Read const &read) {
         log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
     }
   };
-  if (reader_.recv(read.receiver, [&](auto &frame, auto &payload) {
-        log::info<5>("frame={}, len(payload)={}"sv, frame, std::size(payload));
-        buffer_(frame, payload, parse);
-      })) {
+  auto helper = [&](auto &frame, auto &payload) {
+    log::info<5>("frame={}, len(payload)={}"sv, frame, std::size(payload));
+    buffer_(frame, payload, parse);
+  };
+  if (reader_.recv(read.receiver, helper)) {
   } else {
     log::warn("Unexpected: invalid datagram"sv);
   }
@@ -176,8 +194,8 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header
             .stream_id = stream_id_,
             .exchange = shared_.settings.exchange,
             .symbol = symbol,
-            .bids = {const_cast<MBPUpdate *>(std::data(bids)), std::size(bids)},  // FIXME
-            .asks = {const_cast<MBPUpdate *>(std::data(asks)), std::size(asks)},  // FIXME
+            .bids = bids,
+            .asks = asks,
             .update_type = UpdateType::SNAPSHOT,
             .exchange_time_utc = {},
             .exchange_sequence = sequencer.last_sequence(),
@@ -185,7 +203,7 @@ void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header
             .quantity_precision = {},
             .checksum = {},
         };
-        Trace event(trace_info, market_by_price_update_2);
+        Trace event{trace_info, market_by_price_update_2};
         shared_(event, true, [&](auto &market_by_price) { sequencer.apply(market_by_price, sequence, false); });
       };
       auto request_snapshot = [&]([[maybe_unused]] auto retries) {

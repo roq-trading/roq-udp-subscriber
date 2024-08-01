@@ -22,6 +22,9 @@ struct Buffer final {
 
   Buffer();
 
+  Buffer(Buffer &&) = default;
+  Buffer(Buffer const &) = delete;
+
   template <typename Callback>
   bool operator()(core::udp::Frame const &frame, std::span<std::byte const> const &payload, Callback callback) {
     auto result = false;
@@ -31,7 +34,7 @@ struct Buffer final {
       case BUFFERING:
         break;
       case DISPATCH: {
-        Header header{
+        auto header = Header{
             .session_id = frame.session_id,
             .seqno = frame.seqno,
             .last_seqno = frame.last_seqno,
@@ -49,7 +52,7 @@ struct Buffer final {
           auto &item = get_item(next_seqno_);
           if (!item.ready)
             break;
-          Header header{
+          auto header = Header{
               .session_id = session_id_,
               .seqno = next_seqno_,
               .last_seqno = item.last_seqno,
@@ -79,6 +82,10 @@ struct Buffer final {
 
   struct Item final {
     Item();
+
+    Item(Item &&) = default;
+    Item(Item const &) = delete;
+
     void reset();
 
     bool ready = false;
