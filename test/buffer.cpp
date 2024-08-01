@@ -15,7 +15,7 @@ using namespace roq::udp_subscriber::tools;
 // === CONSTANTS ===
 
 namespace {
-auto const SESSION_ID_1 = uint16_t{1};
+uint16_t const SESSION_ID_1 = 1;
 }
 
 // === HELPERS ===
