@@ -24,7 +24,6 @@ namespace udp_subscriber {
 struct Shared final {
   explicit Shared(server::Dispatcher &, Settings const &);
 
-  Shared(Shared &&) = default;
   Shared(Shared const &) = delete;
 
   template <typename... Args>

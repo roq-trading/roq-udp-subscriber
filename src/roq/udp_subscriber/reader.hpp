@@ -12,7 +12,6 @@ namespace udp_subscriber {
 struct Reader final {
   Reader();
 
-  Reader(Reader &&) = default;
   Reader(Reader const &) = delete;
 
   template <typename Callback>

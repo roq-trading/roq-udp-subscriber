@@ -33,7 +33,6 @@ struct Snapshot final : public io::net::udp::Receiver::Handler, public Parser::H
 
   Snapshot(Handler &, io::Context &, uint16_t stream_id, Shared &);
 
-  Snapshot(Snapshot &&) = default;
   Snapshot(Snapshot const &) = delete;
 
   void operator()(Event<Start> const &);

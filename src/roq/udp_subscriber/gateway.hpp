@@ -18,7 +18,6 @@ namespace udp_subscriber {
 struct Gateway final : public server::Handler, public Snapshot::Handler, public Incremental::Handler {
   Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
-  Gateway(Gateway &&) = default;
   Gateway(Gateway const &) = delete;
 
  protected:
