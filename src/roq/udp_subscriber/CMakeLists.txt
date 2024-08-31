@@ -27,6 +27,7 @@ target_link_libraries(
           roq-core::roq-core
           roq-io::roq-io
           roq-market::roq-market
+          roq-codec::roq-codec
           roq-utils::roq-utils
           roq-logging::roq-logging
           roq-logging::roq-logging-flags

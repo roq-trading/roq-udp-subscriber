@@ -32,6 +32,7 @@ requirements:
     - fmt
     - libabseil
     - libsodium
+    - roq-codec
     - roq-core
     - roq-flags
     - roq-io

@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <deque>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -12,7 +13,7 @@
 
 #include "roq/utils/container.hpp"
 
-#include "roq/core/fbs/decoder.hpp"
+#include "roq/codec/fbs/decoder.hpp"
 
 #include "roq/market/mbp/sequencer.hpp"
 
@@ -41,7 +42,7 @@ struct Shared final {
 
   std::vector<Measurement> measurements;
 
-  core::fbs::Decoder decoder;
+  std::unique_ptr<roq::codec::fbs::Decoder> decoder;
 
   uint16_t session_id = {};
 
