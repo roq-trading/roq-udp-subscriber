@@ -26,6 +26,7 @@ include(GNUInstallDirs)
 
 find_package(absl REQUIRED)
 find_package(fmt REQUIRED)
+find_package(magic_enum REQUIRED)
 find_package(roq-api REQUIRED)
 find_package(roq-codec REQUIRED)
 find_package(roq-core REQUIRED)
@@ -36,6 +37,8 @@ find_package(roq-market REQUIRED)
 find_package(roq-server REQUIRED)
 find_package(roq-utils REQUIRED)
 find_package(unordered_dense REQUIRED)
+# note! roq-core
+find_package(Brotli REQUIRED)
 
 if(UNIX AND NOT APPLE)
   find_package(rt REQUIRED)
