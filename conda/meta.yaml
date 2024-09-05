@@ -41,7 +41,6 @@ requirements:
     - roq-oss-unordered_dense
     - roq-server
     - roq-utils
-    - roq-oss-brotli # note! roq-core
 
 about:
   home: https://roq-trading.com
