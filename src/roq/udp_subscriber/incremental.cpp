@@ -267,7 +267,7 @@ void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, tools::Hea
         .measurements = value.measurements,
         .update_type = value.update_type,
     };
-    create_trace_and_dispatch(handler_, trace_info, custom_metrics, true);
+    create_trace_and_dispatch(handler_, trace_info, custom_metrics, true, value.sending_time_utc);
   }
 }
 

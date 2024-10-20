@@ -28,7 +28,7 @@ struct Snapshot final : public io::net::udp::Receiver::Handler, public Parser::H
     virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
     virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
     virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
-    virtual void operator()(Trace<CustomMetrics> const &, bool is_last) = 0;
+    virtual void operator()(Trace<CustomMetrics> const &, bool is_last, std::chrono::nanoseconds sending_time_utc) = 0;
   };
 
   Snapshot(Handler &, io::Context &, uint16_t stream_id, Shared &);

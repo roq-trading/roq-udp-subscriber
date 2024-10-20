@@ -32,7 +32,7 @@ struct Incremental final : public io::net::udp::Receiver::Handler, public Parser
     virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
     virtual void operator()(Trace<TradeSummary> const &, bool is_last) = 0;
     virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
-    virtual void operator()(Trace<CustomMetrics> const &, bool is_last) = 0;
+    virtual void operator()(Trace<CustomMetrics> const &, bool is_last, std::chrono::nanoseconds sending_time_utc) = 0;
   };
 
   Incremental(Handler &, io::Context &, uint16_t stream_id, Shared &);

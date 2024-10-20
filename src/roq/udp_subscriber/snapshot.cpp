@@ -244,7 +244,7 @@ void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, tools::Header
         .measurements = value.measurements,
         .update_type = value.update_type,
     };
-    create_trace_and_dispatch(handler_, trace_info, custom_metrics, true);
+    create_trace_and_dispatch(handler_, trace_info, custom_metrics, true, value.sending_time_utc);
   }
 }
 

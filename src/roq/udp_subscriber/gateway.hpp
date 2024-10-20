@@ -47,7 +47,7 @@ struct Gateway final : public server::Handler, public Snapshot::Handler, public 
   void operator()(Trace<TopOfBook> const &, bool is_last) override;
   void operator()(Trace<TradeSummary> const &, bool is_last) override;
   void operator()(Trace<StatisticsUpdate> const &, bool is_last) override;
-  void operator()(Trace<CustomMetrics> const &, bool is_last) override;
+  void operator()(Trace<CustomMetrics> const &, bool is_last, std::chrono::nanoseconds sending_time_utc) override;
 
  private:
   server::Dispatcher &dispatcher_;

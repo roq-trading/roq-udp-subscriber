@@ -106,8 +106,8 @@ void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(Trace<CustomMetrics> const &event, bool is_last) {
-  dispatcher_(event, is_last);
+void Gateway::operator()(Trace<CustomMetrics> const &event, bool is_last, std::chrono::nanoseconds sending_time_utc) {
+  dispatcher_(event, is_last, sending_time_utc);
 }
 
 }  // namespace udp_subscriber
