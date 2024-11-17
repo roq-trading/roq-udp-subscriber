@@ -22,17 +22,17 @@ target_link_libraries(
   ${TARGET_NAME}
   PRIVATE ${PROJECT_NAME}-flags
           ${PROJECT_NAME}-tools
-          roq-server::roq-server
-          roq-server::roq-server-flags
-          roq-core::roq-core
-          roq-io::roq-io
-          roq-market::roq-market
+          roq-api::roq-api
           roq-codec::roq-codec
-          roq-utils::roq-utils
+          roq-core::roq-core
+          roq-flags::roq-flags
+          roq-io::roq-io
           roq-logging::roq-logging
           roq-logging::roq-logging-flags
-          roq-flags::roq-flags
-          roq-api::roq-api
+          roq-market::roq-market
+          roq-server::roq-server
+          roq-server::roq-server-flags
+          roq-utils::roq-utils
           fmt::fmt
           unordered_dense::unordered_dense)
 
