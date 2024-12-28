@@ -17,7 +17,7 @@ Installing
 
   .. code-block:: shell
 
-     $ mamba install \
+     $ conda install \
            --channel https://roq-trading.com/conda/stable \
            roq-udp-subscriber
 
@@ -25,7 +25,7 @@ Installing
 
   .. code-block:: shell
 
-     $ mamba install \
+     $ conda install \
            --channel https://roq-trading.com/conda/unstable \
            roq-udp-subscriber
 
