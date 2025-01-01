@@ -2,6 +2,10 @@
 
 #pragma once
 
+#include <fmt/core.h>
+
+#include <magic_enum/magic_enum_format.hpp>
+
 #include "roq/core/udp/frame.hpp"
 
 namespace roq {
@@ -43,7 +47,7 @@ struct fmt::formatter<roq::udp_subscriber::tools::Header> {
         value.last_seqno,
         value.object_type,
         value.object_id,
-        magic_enum::enum_name(value.encoding),
+        value.encoding,
         value.snapshot);
   }
 };
