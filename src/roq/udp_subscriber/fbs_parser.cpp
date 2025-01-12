@@ -56,6 +56,10 @@ struct Bridge final : public roq::codec::fbs::Decoder::Handler {
   void operator()(Event<PortfolioUpdate> const &) {}     // drop: XXX
   void operator()(Event<RiskLimits> const &) {}          // drop: XXX
   void operator()(Event<RiskLimitsUpdate> const &) {}    // drop: XXX
+  void operator()(Event<MassQuote> const &) {}           // drop: XXX
+  void operator()(Event<MassQuoteAck> const &) {}        // drop: XXX
+  void operator()(Event<CancelQuotes> const &) {}        // drop: XXX
+  void operator()(Event<CancelQuotesAck> const &) {}     // drop: XXX
 
   void dispatch(auto &event) {
     auto &[message_info, value] = event;
