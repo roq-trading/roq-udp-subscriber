@@ -20,11 +20,12 @@ struct Bridge final : public roq::codec::fbs::Decoder::Handler {
   Bridge(Parser::Handler &handler, tools::Header const &header) : handler_{handler}, header_{header} {}
 
  protected:
-  void operator()(Event<Control> const &) {}        // drop: XXX
-  void operator()(Event<StatusUpdate> const &) {}   // drop: XXX
-  void operator()(Event<DownloadBegin> const &) {}  // drop: XXX
-  void operator()(Event<DownloadEnd> const &) {}    // drop: XXX
-  void operator()(Event<Ready> const &) {}          // drop: XXX
+  void operator()(Event<Control> const &) {}         // drop: XXX
+  void operator()(Event<ServiceUpdate> const &) {}   // drop: XXX
+  void operator()(Event<StrategyUpdate> const &) {}  // drop: XXX
+  void operator()(Event<DownloadBegin> const &) {}   // drop: XXX
+  void operator()(Event<DownloadEnd> const &) {}     // drop: XXX
+  void operator()(Event<Ready> const &) {}           // drop: XXX
   void operator()(Event<GatewaySettings> const &event) { dispatch(event); }
   void operator()(Event<StreamStatus> const &event) { dispatch(event); }
   void operator()(Event<ExternalLatency> const &event) { dispatch(event); }
