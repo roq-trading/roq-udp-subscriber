@@ -21,8 +21,10 @@ struct Bridge final : public roq::codec::fbs::Decoder::Handler {
 
  protected:
   void operator()(Event<Control> const &) {}         // drop: XXX
+  void operator()(Event<ControlAck> const &) {}      // drop: XXX
   void operator()(Event<ServiceUpdate> const &) {}   // drop: XXX
   void operator()(Event<StrategyUpdate> const &) {}  // drop: XXX
+  void operator()(Event<LegsUpdate> const &) {}      // drop: XXX
   void operator()(Event<DownloadBegin> const &) {}   // drop: XXX
   void operator()(Event<DownloadEnd> const &) {}     // drop: XXX
   void operator()(Event<Ready> const &) {}           // drop: XXX
