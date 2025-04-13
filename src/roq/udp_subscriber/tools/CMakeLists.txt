@@ -4,4 +4,4 @@ set(SOURCES buffer.cpp)
 
 add_library(${TARGET_NAME} OBJECT ${SOURCES})
 
-target_link_libraries(${TARGET_NAME} roq-core::roq-core)
+target_link_libraries(${TARGET_NAME} roq-core::roq-core roq-codec::roq-codec)

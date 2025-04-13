@@ -23,8 +23,8 @@ target_link_libraries(
   PRIVATE ${PROJECT_NAME}-flags
           ${PROJECT_NAME}-tools
           roq-api::roq-api
-          roq-codec::roq-codec
           roq-core::roq-core
+          roq-codec::roq-codec
           roq-flags::roq-flags
           roq-io::roq-io
           roq-logging::roq-logging
