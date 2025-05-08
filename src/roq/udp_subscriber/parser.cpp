@@ -27,8 +27,9 @@ size_t Parser::dispatch(Handler &handler, tools::Header const &header, std::span
         ok = true;
         break;
     }
-    if (!ok)
+    if (!ok) {
       log::warn("Unexpected: header={}"sv, header);
+    }
   } else {
     auto heartbeat = Heartbeat{};
     create_trace_and_dispatch(handler, trace_info, heartbeat, header);

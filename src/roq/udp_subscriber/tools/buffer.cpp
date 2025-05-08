@@ -32,14 +32,16 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
   // log::debug("seqno={}, next={}"sv, seqno, next_seqno_);
   // reset
   if (session_id_ != frame.session_id) {
-    if (session_id_)
+    if (session_id_) {
       log::warn(R"(+++ SESSION RESET \x{:04x} +++)"sv, frame.session_id);
+    }
     session_id_ = frame.session_id;
     next_seqno_ = seqno;
   }
   // drop
-  if (is_replay(seqno))
+  if (is_replay(seqno)) {
     return Status::BUFFERING;
+  }
   // simple
   if (seqno == next_seqno_ && frame.fragment_max == 0) {
     advance();
@@ -55,14 +57,16 @@ Buffer::Status Buffer::update(core::udp::Frame const &frame, std::span<std::byte
         item.available.set(index);
         auto offset = frame.fragment * MAX_PAYLOAD;
         std::copy(std::begin(payload), std::end(payload), std::begin(item.payload) + offset);
-        if (index == frame.fragment_max)
+        if (index == frame.fragment_max) {
           item.size = offset + std::size(payload);
+        }
         ++item.count;
         assert(!item.ready);
         if (item.count == (static_cast<size_t>(frame.fragment_max) + 1)) {  // note! +1
           item.ready = true;
-          if (seqno == next_seqno_)
+          if (seqno == next_seqno_) {
             result = Status::READY;
+          }
           assert(item.available.count() == item.count);
           //
           item.last_seqno = frame.last_seqno;
@@ -120,8 +124,9 @@ namespace {
 // deals with overflow
 template <typename T>
 constexpr size_t diff(T lhs, T rhs) {
-  if (lhs >= rhs)
+  if (lhs >= rhs) {
     return lhs - rhs;
+  }
   return lhs + (std::numeric_limits<T>::max() - rhs) + 1;
 }
 // normal
@@ -176,8 +181,9 @@ bool Buffer::get_buffer(uint32_t seqno, Callback callback) {
 }
 
 void Buffer::reset() {
-  for (auto &item : assembly_)
+  for (auto &item : assembly_) {
     item.reset();
+  }
 }
 
 // Item

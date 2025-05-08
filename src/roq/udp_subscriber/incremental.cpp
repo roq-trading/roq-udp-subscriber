@@ -31,8 +31,9 @@ auto const SOCKET_OPTIONS = Mask{
 namespace {
 auto create_receiver_helper(auto &handler, auto &context, auto &address, auto port) {
   auto address_2 = [&]() -> std::string_view {
-    if (std::empty(address))
+    if (std::empty(address)) {
       return LOCALHOST;  // note! default is localhost
+    }
     return address;
   }();
   auto network_address = io::NetworkAddress::create_blocking(address_2, port);
@@ -46,15 +47,18 @@ auto create_receivers(auto &handler, auto &settings, auto &context) {
   result_type result;
   auto address = settings.udp.incremental_address;
   auto port = settings.udp.incremental_port;
-  if (std::empty(port))
+  if (std::empty(port)) {
     log::fatal("Unexpected: port is missing"sv);
-  if (std::size(port) > 1 && std::size(address) > 1 && std::size(port) != std::size(address))
+  }
+  if (std::size(port) > 1 && std::size(address) > 1 && std::size(port) != std::size(address)) {
     log::fatal("Unexpected: mismatched length of address and port"sv);
+  }
   auto length = std::max(std::size(address), std::size(port));
   for (size_t i = 0; i < length; ++i) {
     auto address_ = [&]() -> std::string {
-      if (std::empty(address))
+      if (std::empty(address)) {
         return {};
+      }
       return address[std::min(i, std::size(address) - 1)];
     }();
     auto port_ = port[std::min(i, std::size(port) - 1)];
@@ -78,8 +82,9 @@ void Incremental::operator()(Event<Stop> const &) {
 }
 
 void Incremental::operator()(Event<Timer> const &event) {
-  if (!last_update_time_.count())
+  if (!last_update_time_.count()) {
     return;
+  }
   if ((last_update_time_ + shared_.settings.misc.udp_heartbeat_timeout) < event.value.now) {
     last_update_time_ = {};
     TraceInfo trace_info;
@@ -102,8 +107,9 @@ void Incremental::operator()(io::net::udp::Receiver::Read const &read) {
     }
     auto &state = shared_.state[{header.object_type, header.object_id}];
     auto bytes = Parser::dispatch(*this, header, payload, trace_info, shared_);
-    if (bytes != std::size(payload))
+    if (bytes != std::size(payload)) {
       log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
+    }
     if (state.ready) {
       state.last_seqno = header.seqno;
     } else {
@@ -147,8 +153,9 @@ void Incremental::operator()(Trace<Parser::Heartbeat> const &event, tools::Heade
 }
 
 void Incremental::operator()(Trace<GatewaySettings> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event);
+  }
 }
 
 void Incremental::operator()(Trace<StreamStatus> const &event, tools::Header const &header) {
@@ -156,18 +163,21 @@ void Incremental::operator()(Trace<StreamStatus> const &event, tools::Header con
 }
 
 void Incremental::operator()(Trace<ExternalLatency> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event);
+  }
 }
 
 void Incremental::operator()(Trace<GatewayStatus> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event);
+  }
 }
 
 void Incremental::operator()(Trace<ReferenceData> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event, true);
+  }
 }
 
 void Incremental::operator()(Trace<MarketStatus> const &event, tools::Header const &header) {
@@ -177,8 +187,9 @@ void Incremental::operator()(Trace<MarketStatus> const &event, tools::Header con
 }
 
 void Incremental::operator()(Trace<TopOfBook> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event, true);
+  }
 }
 
 void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header const &header) {
@@ -247,13 +258,15 @@ void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Hea
 }
 
 void Incremental::operator()(Trace<TradeSummary> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event, true);
+  }
 }
 
 void Incremental::operator()(Trace<StatisticsUpdate> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event, true);
+  }
 }
 
 void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, tools::Header const &header) {
@@ -284,8 +297,9 @@ bool Incremental::update(Trace<T> const &event, tools::Header const &) {
     result |= utils::compare(supports_, shared_.supports) != 0;
     return result;
   }();
-  if (updated)
+  if (updated) {
     publish_stream_status(trace_info, shared_.supports, ConnectionStatus::READY);
+  }
   last_update_time_ = trace_info.source_receive_time;
   return true;
 }

@@ -50,8 +50,9 @@ struct Buffer final {
       case READY:
         while (true) {
           auto &item = get_item(next_seqno_);
-          if (!item.ready)
+          if (!item.ready) {
             break;
+          }
           auto header = Header{
               .session_id = session_id_,
               .seqno = next_seqno_,

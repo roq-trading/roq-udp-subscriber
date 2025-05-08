@@ -30,8 +30,9 @@ auto const SOCKET_OPTIONS = Mask{
 namespace {
 auto create_receiver_helper(auto &handler, auto &context, auto &address, auto port) {
   auto address_2 = [&]() -> std::string_view {
-    if (std::empty(address))
+    if (std::empty(address)) {
       return LOCALHOST;  // note! default is localhost
+    }
     return address;
   }();
   auto network_address = io::NetworkAddress::create_blocking(address_2, port);
@@ -45,15 +46,18 @@ auto create_receivers(auto &handler, auto &settings, auto &context) {
   result_type result;
   auto address = settings.udp.snapshot_address;
   auto port = settings.udp.snapshot_port;
-  if (std::empty(port))
+  if (std::empty(port)) {
     log::fatal("Unexpected: port is missing"sv);
-  if (std::size(port) > 1 && std::size(address) > 1 && std::size(port) != std::size(address))
+  }
+  if (std::size(port) > 1 && std::size(address) > 1 && std::size(port) != std::size(address)) {
     log::fatal("Unexpected: mismatched length of address and port"sv);
+  }
   auto length = std::max(std::size(address), std::size(port));
   for (size_t i = 0; i < length; ++i) {
     auto address_ = [&]() -> std::string {
-      if (std::empty(address))
+      if (std::empty(address)) {
         return {};
+      }
       return address[std::min(i, std::size(address) - 1)];
     }();
     auto port_ = port[std::min(i, std::size(port) - 1)];
@@ -77,8 +81,9 @@ void Snapshot::operator()(Event<Stop> const &) {
 }
 
 void Snapshot::operator()(Event<Timer> const &event) {
-  if (!last_update_time_.count())
+  if (!last_update_time_.count()) {
     return;
+  }
   if ((last_update_time_ + shared_.settings.misc.udp_heartbeat_timeout) < event.value.now) {
     last_update_time_ = {};
     TraceInfo trace_info;
@@ -94,12 +99,14 @@ void Snapshot::operator()(io::net::udp::Receiver::Read const &read) {
   auto parse = [&](auto &header, auto &payload) {
     log::info<5>("header={}, len(payload)={}"sv, header, std::size(payload));
     // note! different session id drops
-    if (header.session_id != shared_.session_id)
+    if (header.session_id != shared_.session_id) {
       return;
+    }
     auto &state = shared_.state[{header.object_type, header.object_id}];
     auto include = [&header, &state]() {
-      if (header.object_type == 0x0)  // always
+      if (header.object_type == 0x0) {  // always
         return true;
+      }
       if (state.ready) {
         return false;
       } else {
@@ -122,8 +129,9 @@ void Snapshot::operator()(io::net::udp::Receiver::Read const &read) {
       }
       // parse
       auto bytes = Parser::dispatch(*this, header, payload, trace_info, shared_);
-      if (bytes != std::size(payload))
+      if (bytes != std::size(payload)) {
         log::warn("Unexpected: bytes={}, len(payload)={}"sv, bytes, std::size(payload));
+      }
     }
   };
   auto helper = [&](auto &frame, auto &payload) {
@@ -145,8 +153,9 @@ void Snapshot::operator()(Trace<Parser::Heartbeat> const &event, tools::Header c
 }
 
 void Snapshot::operator()(Trace<GatewaySettings> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event);
+  }
 }
 
 void Snapshot::operator()(Trace<StreamStatus> const &event, tools::Header const &header) {
@@ -158,18 +167,21 @@ void Snapshot::operator()(Trace<ExternalLatency> const &, tools::Header const &)
 }
 
 void Snapshot::operator()(Trace<GatewayStatus> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event);
+  }
 }
 
 void Snapshot::operator()(Trace<ReferenceData> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event, true);
+  }
 }
 
 void Snapshot::operator()(Trace<MarketStatus> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event, true);
+  }
 }
 
 void Snapshot::operator()(Trace<TopOfBook> const &, tools::Header const &) {
@@ -229,8 +241,9 @@ void Snapshot::operator()(Trace<TradeSummary> const &, tools::Header const &) {
 }
 
 void Snapshot::operator()(Trace<StatisticsUpdate> const &event, tools::Header const &header) {
-  if (update(event, header))
+  if (update(event, header)) {
     handler_(event, true);
+  }
 }
 
 void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, tools::Header const &header) {
@@ -259,8 +272,9 @@ bool Snapshot::update(Trace<T> const &event, tools::Header const &) {
     }
     return result;
   }();
-  if (updated)
+  if (updated) {
     publish_stream_status(trace_info, shared_.supports, ConnectionStatus::READY);
+  }
   last_update_time_ = trace_info.source_receive_time;
   return true;
 }

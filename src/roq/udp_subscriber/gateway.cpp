@@ -98,8 +98,9 @@ void Gateway::operator()(Trace<GatewaySettings> const &) {
 
 void Gateway::operator()(Trace<StreamStatus> const &event) {
   // note! order management is not supported (reason: string_map not populated)
-  if (std::empty(event.value.account))
+  if (std::empty(event.value.account)) {
     dispatcher_(event);
+  }
 }
 
 void Gateway::operator()(Trace<ExternalLatency> const &event) {
