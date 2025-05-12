@@ -43,7 +43,7 @@ auto create_receiver_helper(auto &handler, auto &context, auto &address, auto po
 
 template <typename T>
 auto create_receivers(auto &handler, auto &settings, auto &context) {
-  using result_type = std::remove_cvref<T>::type;
+  using result_type = std::remove_cvref_t<T>;
   result_type result;
   auto address = settings.udp.incremental_address;
   auto port = settings.udp.incremental_port;
@@ -289,8 +289,8 @@ bool Incremental::update(Trace<T> const &event, tools::Header const &) {
   auto &trace_info = event.trace_info;
   auto updated = [&]() {
     auto result = !last_update_time_.count();
-    using value_type = typename std::remove_cvref<T>::type;
-    if constexpr (std::is_same<value_type, GatewayStatus>::value) {
+    using value_type = typename std::remove_cvref_t<T>;
+    if constexpr (std::is_same_v<value_type, GatewayStatus>) {
       // note! let snapshot update (for now, later we can do something with seqno)
     }
     // note! instead we inherit from snapshot
