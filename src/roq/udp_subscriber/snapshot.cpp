@@ -91,7 +91,7 @@ void Snapshot::operator()(Event<Timer> const &event) {
   }
 }
 
-void Snapshot::operator()(metrics::Writer &) {
+void Snapshot::operator()(metrics::Writer &) const {
 }
 
 void Snapshot::operator()(io::net::udp::Receiver::Read const &read) {

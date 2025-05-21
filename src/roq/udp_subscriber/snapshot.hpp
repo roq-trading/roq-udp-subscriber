@@ -39,7 +39,7 @@ struct Snapshot final : public io::net::udp::Receiver::Handler, public Parser::H
   void operator()(Event<Stop> const &);
   void operator()(Event<Timer> const &);
 
-  void operator()(metrics::Writer &);
+  void operator()(metrics::Writer &) const;
 
  protected:
   // io::net::udp::Receiver::Handler

@@ -40,7 +40,7 @@ struct Gateway final : public server::Handler, public Snapshot::Handler, public 
 
   uint16_t operator()(Event<CancelQuotes> const &) override;
 
-  void operator()(metrics::Writer &) override;
+  void operator()(metrics::Writer &) const override;
 
   // many
   void operator()(Trace<GatewaySettings> const &) override;

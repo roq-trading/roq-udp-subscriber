@@ -92,7 +92,7 @@ void Incremental::operator()(Event<Timer> const &event) {
   }
 }
 
-void Incremental::operator()(metrics::Writer &) {
+void Incremental::operator()(metrics::Writer &) const {
 }
 
 void Incremental::operator()(io::net::udp::Receiver::Read const &read) {
