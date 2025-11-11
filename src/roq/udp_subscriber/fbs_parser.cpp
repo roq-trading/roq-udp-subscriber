@@ -4,7 +4,7 @@
 
 #include "roq/clock.hpp"
 
-#include "roq/codec/fbs/decoder.hpp"
+#include "roq/codec/flatbuffers/decoder.hpp"
 
 #include "roq/core/fbs/decoder.hpp"
 
@@ -16,7 +16,7 @@ namespace udp_subscriber {
 // === HELPERS ===
 
 namespace {
-struct Bridge final : public roq::codec::fbs::Decoder::Handler {
+struct Bridge final : public roq::codec::flatbuffers::Decoder::Handler {
   Bridge(Parser::Handler &handler, tools::Header const &header) : handler_{handler}, header_{header} {}
 
  protected:

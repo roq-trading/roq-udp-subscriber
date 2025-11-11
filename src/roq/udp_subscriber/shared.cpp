@@ -24,7 +24,7 @@ auto const SUPPORTS = Mask{
 // === IMPLEMENTATION ===
 
 Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
-    : dispatcher_{dispatcher}, settings{settings}, decoder{roq::codec::fbs::Decoder::create()} {
+    : dispatcher_{dispatcher}, settings{settings}, decoder{roq::codec::flatbuffers::Decoder::create()} {
 }
 
 bool Shared::update(Mask<SupportType> value) {

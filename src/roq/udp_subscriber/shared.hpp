@@ -13,7 +13,7 @@
 
 #include "roq/utils/container.hpp"
 
-#include "roq/codec/fbs/decoder.hpp"
+#include "roq/codec/flatbuffers/decoder.hpp"
 
 #include "roq/market/mbp/sequencer.hpp"
 
@@ -42,7 +42,7 @@ struct Shared final {
 
   std::vector<Measurement> measurements;
 
-  std::unique_ptr<roq::codec::fbs::Decoder> decoder;
+  std::unique_ptr<roq::codec::flatbuffers::Decoder> decoder;
 
   uint16_t session_id = {};
 
