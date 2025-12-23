@@ -42,6 +42,7 @@ struct Bridge final : public roq::codec::flatbuffers::Decoder::Handler {
   void operator()(Event<TradeSummary> const &event) { dispatch(event); }
   void operator()(Event<StatisticsUpdate> const &event) { dispatch(event); }
   void operator()(Event<TimeSeriesUpdate> const &) {}    // drop: server specific
+  void operator()(Event<Subscribe> const &) {}           // drop: server specific
   void operator()(Event<CreateOrder> const &) {}         // drop: server specific
   void operator()(Event<ModifyOrder> const &) {}         // drop: server specific
   void operator()(Event<CancelOrder> const &) {}         // drop: server specific
