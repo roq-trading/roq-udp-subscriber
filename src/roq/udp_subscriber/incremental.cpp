@@ -315,6 +315,7 @@ void Incremental::publish_stream_status(TraceInfo const &trace_info, Mask<Suppor
         .encoding = {Encoding::FBS},
         .priority = Priority::PRIMARY,
         .connection_status = connection_status_,
+        .reason = {},
         .interface = {},
         .authority = {},
         .path = {},

@@ -290,6 +290,7 @@ void Snapshot::publish_stream_status(TraceInfo const &trace_info, Mask<SupportTy
         .encoding = {Encoding::FBS},
         .priority = Priority::SECONDARY,
         .connection_status = connection_status_,
+        .reason = {},
         .interface = {},
         .authority = {},
         .path = {},
