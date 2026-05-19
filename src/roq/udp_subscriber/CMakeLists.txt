@@ -11,7 +11,6 @@ set(SOURCES
     incremental.cpp
     parser.cpp
     reader.cpp
-    settings.cpp
     shared.cpp
     snapshot.cpp
     main.cpp)
@@ -31,7 +30,6 @@ target_link_libraries(
           roq-logging::roq-logging-flags
           roq-market::roq-market
           roq-server::roq-server
-          roq-server::roq-server-flags
           roq-utils::roq-utils
           fmt::fmt
           unordered_dense::unordered_dense)
