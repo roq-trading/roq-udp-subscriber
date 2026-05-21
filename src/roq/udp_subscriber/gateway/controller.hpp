@@ -25,8 +25,6 @@ struct Controller final : public server::Handler, public Snapshot::Handler, publ
 
   Controller(Controller const &) = delete;
 
-  virtual ~Controller() = default;
-
  protected:
   void operator()(Event<Start> const &) override;
   void operator()(Event<Stop> const &) override;
