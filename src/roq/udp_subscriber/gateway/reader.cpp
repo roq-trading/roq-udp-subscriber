@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/udp_subscriber/reader.hpp"
+#include "roq/udp_subscriber/gateway/reader.hpp"
 
 #include "roq/logging.hpp"
 
@@ -8,6 +8,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -29,5 +30,6 @@ bool Reader::validate(std::span<std::byte const> const &message) {
   return true;
 }
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

@@ -7,12 +7,13 @@
 
 #include "roq/core/udp/frame.hpp"
 
-#include "roq/udp_subscriber/shared.hpp"
+#include "roq/udp_subscriber/gateway/shared.hpp"
 
 #include "roq/udp_subscriber/tools/header.hpp"
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
 struct Parser {
   struct Heartbeat final {};
@@ -35,5 +36,6 @@ struct Parser {
   static size_t dispatch(Handler &, tools::Header const &, std::span<std::byte const> const &payload, TraceInfo const &, Shared &);
 };
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

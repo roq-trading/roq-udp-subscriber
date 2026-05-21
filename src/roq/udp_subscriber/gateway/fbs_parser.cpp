@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/udp_subscriber/fbs_parser.hpp"
+#include "roq/udp_subscriber/gateway/fbs_parser.hpp"
 
 #include "roq/clock.hpp"
 
@@ -12,6 +12,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
 // === HELPERS ===
 
@@ -94,5 +95,6 @@ void FBSParser::dispatch_helper(Handler &handler, std::span<std::byte const> con
   (*shared.decoder)(bridge, payload, message_info);
 }
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

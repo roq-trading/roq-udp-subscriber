@@ -7,33 +7,38 @@
 
 #include "roq/server.hpp"
 
+#include "roq/io/buffer.hpp"
 #include "roq/io/context.hpp"
 
 #include "roq/io/net/udp/receiver.hpp"
 
-#include "roq/udp_subscriber/parser.hpp"
-#include "roq/udp_subscriber/reader.hpp"
-#include "roq/udp_subscriber/shared.hpp"
+#include "roq/udp_subscriber/gateway/parser.hpp"
+#include "roq/udp_subscriber/gateway/reader.hpp"
+#include "roq/udp_subscriber/gateway/shared.hpp"
 
 #include "roq/udp_subscriber/tools/buffer.hpp"
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
-struct Snapshot final : public io::net::udp::Receiver::Handler, public Parser::Handler {
+struct Incremental final : public io::net::udp::Receiver::Handler, public Parser::Handler {
   struct Handler {
     virtual void operator()(Trace<GatewaySettings> const &) = 0;
     virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency> const &) = 0;
     virtual void operator()(Trace<GatewayStatus> const &) = 0;
     virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
     virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TradeSummary> const &, bool is_last) = 0;
     virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
     virtual void operator()(Trace<CustomMetrics> const &, bool is_last, std::chrono::nanoseconds sending_time_utc) = 0;
   };
 
-  Snapshot(Handler &, io::Context &, uint16_t stream_id, Shared &);
+  Incremental(Handler &, io::Context &, uint16_t stream_id, Shared &);
 
-  Snapshot(Snapshot const &) = delete;
+  Incremental(Incremental const &) = delete;
 
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
@@ -81,5 +86,6 @@ struct Snapshot final : public io::net::udp::Receiver::Handler, public Parser::H
   Mask<SupportType> supports_;
 };
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

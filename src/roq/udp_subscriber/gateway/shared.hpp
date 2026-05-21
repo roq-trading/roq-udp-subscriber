@@ -17,10 +17,11 @@
 
 #include "roq/market/mbp/sequencer.hpp"
 
-#include "roq/udp_subscriber/settings.hpp"
+#include "roq/udp_subscriber/gateway/settings.hpp"
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
 struct Shared final {
   explicit Shared(server::Dispatcher &, Settings const &);
@@ -59,5 +60,6 @@ struct Shared final {
   Mask<SupportType> supports;
 };
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

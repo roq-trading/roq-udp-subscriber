@@ -1,11 +1,12 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/udp_subscriber/shared.hpp"
+#include "roq/udp_subscriber/gateway/shared.hpp"
 
 #include "roq/utils/update.hpp"
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -32,5 +33,6 @@ bool Shared::update(Mask<SupportType> value) {
   return utils::update(supports, masked);
 }
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

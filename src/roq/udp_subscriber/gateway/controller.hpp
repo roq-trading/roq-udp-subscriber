@@ -2,23 +2,30 @@
 
 #pragma once
 
+#include "roq/compat.hpp"
+
 #include "roq/server.hpp"
 
 #include "roq/io/context.hpp"
 
-#include "roq/udp_subscriber/config.hpp"
-#include "roq/udp_subscriber/incremental.hpp"
-#include "roq/udp_subscriber/settings.hpp"
-#include "roq/udp_subscriber/shared.hpp"
-#include "roq/udp_subscriber/snapshot.hpp"
+#include "roq/udp_subscriber/gateway/config.hpp"
+#include "roq/udp_subscriber/gateway/incremental.hpp"
+#include "roq/udp_subscriber/gateway/settings.hpp"
+#include "roq/udp_subscriber/gateway/shared.hpp"
+#include "roq/udp_subscriber/gateway/snapshot.hpp"
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
-struct Gateway final : public server::Handler, public Snapshot::Handler, public Incremental::Handler {
-  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+struct Controller final : public server::Handler, public Snapshot::Handler, public Incremental::Handler {
+  ROQ_PUBLIC static std::unique_ptr<server::Handler> create(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
-  Gateway(Gateway const &) = delete;
+  Controller(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+
+  Controller(Controller const &) = delete;
+
+  virtual ~Controller() = default;
 
  protected:
   void operator()(Event<Start> const &) override;
@@ -75,5 +82,6 @@ struct Gateway final : public server::Handler, public Snapshot::Handler, public 
   Incremental incremental_;
 };
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

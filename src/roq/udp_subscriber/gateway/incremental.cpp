@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/udp_subscriber/incremental.hpp"
+#include "roq/udp_subscriber/gateway/incremental.hpp"
 
 #include <algorithm>
 #include <string>
@@ -15,6 +15,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -325,5 +326,6 @@ void Incremental::publish_stream_status(TraceInfo const &trace_info, Mask<Suppor
   }
 }
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

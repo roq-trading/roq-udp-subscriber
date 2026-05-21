@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/udp_subscriber/snapshot.hpp"
+#include "roq/udp_subscriber/gateway/snapshot.hpp"
 
 #include <algorithm>
 #include <string>
@@ -14,6 +14,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
 // === constants ===
 
@@ -300,5 +301,6 @@ void Snapshot::publish_stream_status(TraceInfo const &trace_info, Mask<SupportTy
   }
 }
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq

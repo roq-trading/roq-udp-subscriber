@@ -2,9 +2,10 @@
 
 #include "roq/udp_subscriber/application.hpp"
 
-#include "roq/udp_subscriber/config.hpp"
-#include "roq/udp_subscriber/gateway.hpp"
-#include "roq/udp_subscriber/settings.hpp"
+#include "roq/udp_subscriber/flags/settings.hpp"
+
+#include "roq/udp_subscriber/gateway/config.hpp"
+#include "roq/udp_subscriber/gateway/controller.hpp"
 
 using namespace std::literals;
 
@@ -14,10 +15,10 @@ namespace udp_subscriber {
 // === IMPLEMENTATION ===
 
 int Application::main(args::Parser const &args) {
-  Settings settings{args};
-  Config config{settings};
+  flags::Settings settings{args};
+  gateway::Config config{settings};
   auto context = server::create_io_context(settings);
-  server::Router<Gateway>{settings, config, *context}.dispatch();
+  server::Router2<gateway::Controller>{settings, config, *context}.dispatch();
   return EXIT_SUCCESS;
 }
 

@@ -8,6 +8,7 @@
 
 namespace roq {
 namespace udp_subscriber {
+namespace gateway {
 
 struct Reader final {
   Reader();
@@ -35,5 +36,6 @@ struct Reader final {
   std::vector<std::byte> buffer_;
 };
 
+}  // namespace gateway
 }  // namespace udp_subscriber
 }  // namespace roq
