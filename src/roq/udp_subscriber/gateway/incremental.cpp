@@ -195,8 +195,7 @@ void Incremental::operator()(Trace<TopOfBook> const &event, tools::Header const 
 
 void Incremental::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header const &header) {
   if (update(event, header)) {
-    auto &trace_info = event.trace_info;
-    auto &market_by_price_update = event.value;
+    auto &[trace_info, market_by_price_update] = event;
     auto symbol = market_by_price_update.symbol;
     auto &sequencer = shared_.mbp_sequencer[symbol];
     if (utils::is_snapshot(market_by_price_update.update_type)) {
@@ -287,7 +286,7 @@ void Incremental::operator()(Trace<CustomMetricsUpdate> const &event, tools::Hea
 
 template <typename T>
 bool Incremental::update(Trace<T> const &event, tools::Header const &) {
-  auto &trace_info = event.trace_info;
+  auto &[trace_info, value] = event;
   auto updated = [&]() {
     auto result = !last_update_time_.count();
     using value_type = typename std::remove_cvref_t<T>;

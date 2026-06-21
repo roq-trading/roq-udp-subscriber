@@ -191,8 +191,7 @@ void Snapshot::operator()(Trace<TopOfBook> const &, tools::Header const &) {
 
 void Snapshot::operator()(Trace<MarketByPriceUpdate> const &event, tools::Header const &header) {
   if (update(event, header)) {
-    auto &trace_info = event.trace_info;
-    auto &market_by_price_update = event.value;
+    auto &[trace_info, market_by_price_update] = event;
     auto symbol = market_by_price_update.symbol;
     auto &sequencer = shared_.mbp_sequencer[symbol];
     try {
@@ -264,12 +263,12 @@ void Snapshot::operator()(Trace<CustomMetricsUpdate> const &event, tools::Header
 
 template <typename T>
 bool Snapshot::update(Trace<T> const &event, tools::Header const &) {
-  auto &trace_info = event.trace_info;
+  auto &[trace_info, value] = event;
   auto updated = [&]() {
     auto result = !last_update_time_.count();
     using value_type = typename std::remove_cvref_t<T>;
     if constexpr (std::is_same_v<value_type, GatewayStatus>) {
-      result |= shared_.update(event.value.supported);
+      result |= shared_.update(value.supported);
     }
     return result;
   }();
