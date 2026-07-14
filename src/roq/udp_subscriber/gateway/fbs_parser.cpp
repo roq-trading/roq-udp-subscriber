@@ -21,6 +21,8 @@ struct Bridge final : public roq::codec::flatbuffers::Decoder::Handler {
   Bridge(Parser::Handler &handler, tools::Header const &header) : handler_{handler}, header_{header} {}
 
  protected:
+  void operator()(Event<Handshake> const &) {}       // drop: XXX
+  void operator()(Event<HandshakeAck> const &) {}    // drop: XXX
   void operator()(Event<Control> const &) {}         // drop: XXX
   void operator()(Event<ControlAck> const &) {}      // drop: XXX
   void operator()(Event<ServiceUpdate> const &) {}   // drop: XXX
