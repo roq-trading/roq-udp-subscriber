@@ -24,6 +24,9 @@ auto const OMS_REQUEST_ID_TYPE = RequestIdType::BASE64;
 namespace {
 auto create_gateway_settings(auto &settings) -> GatewaySettings {
   return {
+      .api = {},
+      .instance = {},
+      .is_uat = {},
       .supports = SUPPORTS,
       .mbp_max_depth = {},
       .mbp_tick_size_multiplier = NaN,
