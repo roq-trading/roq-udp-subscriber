@@ -6,7 +6,7 @@
 
 #include "roq/codec/flatbuffers/decoder.hpp"
 
-#include "roq/core/fbs/decoder.hpp"
+#include "roq/core/flatbuffers/decoder.hpp"
 
 using namespace std::literals;
 
@@ -91,8 +91,8 @@ struct Bridge final : public roq::codec::flatbuffers::Decoder::Handler {
 // === IMPLEMENTATION ===
 
 void FBSParser::dispatch_helper(Handler &handler, std::span<std::byte const> const &payload, TraceInfo const &, Shared &shared, tools::Header const &header) {
-  auto event = core::fbs::Decoder::create_event(payload);
-  auto message_info = core::fbs::Decoder::create_message_info(event, 0, {}, {}, true);
+  auto event = core::flatbuffers::Decoder::create_event(payload);
+  auto message_info = core::flatbuffers::Decoder::create_message_info(event, 0, {}, {}, true);
   Bridge bridge{handler, header};
   (*shared.decoder)(bridge, payload, message_info);
 }
