@@ -30,6 +30,7 @@ requirements:
     - roq-cache
     - roq-codec
     - roq-core
+    - roq-cpp-schema
     - roq-fix
     - roq-flags
     - roq-io
