@@ -36,6 +36,7 @@ requirements:
     - roq-io
     - roq-logging
     - roq-market
+    - roq-oss-libflatbuffers
     - roq-oss-tomlplusplus
     - roq-server
     - roq-utils
