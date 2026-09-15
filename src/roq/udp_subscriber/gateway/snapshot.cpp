@@ -185,6 +185,12 @@ void Snapshot::operator()(Trace<MarketStatus> const &event, tools::Header const 
   }
 }
 
+void Snapshot::operator()(Trace<MarketSegmentStatus> const &event, tools::Header const &header) {
+  if (update(event, header)) {
+    handler_(event, true);
+  }
+}
+
 void Snapshot::operator()(Trace<TopOfBook> const &, tools::Header const &) {
   log::fatal("Unexpected"sv);
 }

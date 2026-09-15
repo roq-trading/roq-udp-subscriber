@@ -30,6 +30,7 @@ struct Incremental final : public io::net::udp::Receiver::Handler, public Parser
     virtual void operator()(Trace<GatewayStatus> const &) = 0;
     virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
     virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketSegmentStatus> const &, bool is_last) = 0;
     virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
     virtual void operator()(Trace<TradeSummary> const &, bool is_last) = 0;
     virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
@@ -59,6 +60,7 @@ struct Incremental final : public io::net::udp::Receiver::Handler, public Parser
   void operator()(Trace<GatewayStatus> const &, tools::Header const &) override;
   void operator()(Trace<ReferenceData> const &, tools::Header const &) override;
   void operator()(Trace<MarketStatus> const &, tools::Header const &) override;
+  void operator()(Trace<MarketSegmentStatus> const &, tools::Header const &) override;
   void operator()(Trace<TopOfBook> const &, tools::Header const &) override;
   void operator()(Trace<MarketByPriceUpdate> const &, tools::Header const &) override;
   void operator()(Trace<TradeSummary> const &, tools::Header const &) override;

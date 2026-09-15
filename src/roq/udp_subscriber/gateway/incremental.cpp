@@ -187,6 +187,12 @@ void Incremental::operator()(Trace<MarketStatus> const &event, tools::Header con
   }
 }
 
+void Incremental::operator()(Trace<MarketSegmentStatus> const &event, tools::Header const &header) {
+  if (update(event, header)) {
+    handler_(event, true);
+  }
+}
+
 void Incremental::operator()(Trace<TopOfBook> const &event, tools::Header const &header) {
   if (update(event, header)) {
     handler_(event, true);

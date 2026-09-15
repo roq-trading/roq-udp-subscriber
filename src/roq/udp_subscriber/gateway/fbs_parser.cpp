@@ -39,6 +39,7 @@ struct Bridge final : public roq::codec::flatbuffers::Decoder::Handler {
   void operator()(Event<GatewayStatus> const &event) { dispatch(event); }
   void operator()(Event<ReferenceData> const &event) { dispatch(event); }
   void operator()(Event<MarketStatus> const &event) { dispatch(event); }
+  void operator()(Event<MarketSegmentStatus> const &event) { dispatch(event); }
   void operator()(Event<TopOfBook> const &event) { dispatch(event); }
   void operator()(Event<MarketByPriceUpdate> const &event) { dispatch(event); }
   void operator()(Event<MarketByOrderUpdate> const &) {}  // drop: ???

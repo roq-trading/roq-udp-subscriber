@@ -26,6 +26,7 @@ struct Parser {
     virtual void operator()(Trace<GatewayStatus> const &, tools::Header const &) = 0;
     virtual void operator()(Trace<ReferenceData> const &, tools::Header const &) = 0;
     virtual void operator()(Trace<MarketStatus> const &, tools::Header const &) = 0;
+    virtual void operator()(Trace<MarketSegmentStatus> const &, tools::Header const &) = 0;
     virtual void operator()(Trace<TopOfBook> const &, tools::Header const &) = 0;
     virtual void operator()(Trace<MarketByPriceUpdate> const &, tools::Header const &) = 0;
     virtual void operator()(Trace<TradeSummary> const &, tools::Header const &) = 0;

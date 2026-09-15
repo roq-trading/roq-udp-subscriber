@@ -130,6 +130,10 @@ void Controller::operator()(Trace<MarketStatus> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
+void Controller::operator()(Trace<MarketSegmentStatus> const &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
 void Controller::operator()(Trace<TopOfBook> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }

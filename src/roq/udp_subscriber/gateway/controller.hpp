@@ -64,6 +64,7 @@ struct Controller final : public server::Handler, public Snapshot::Handler, publ
   void operator()(Trace<GatewayStatus> const &) override;
   void operator()(Trace<ReferenceData> const &, bool is_last) override;
   void operator()(Trace<MarketStatus> const &, bool is_last) override;
+  void operator()(Trace<MarketSegmentStatus> const &, bool is_last) override;
   void operator()(Trace<TopOfBook> const &, bool is_last) override;
   void operator()(Trace<TradeSummary> const &, bool is_last) override;
   void operator()(Trace<StatisticsUpdate> const &, bool is_last) override;
