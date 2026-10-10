@@ -45,8 +45,8 @@ struct Snapshot final : public io::net::udp::Receiver::Handler, public Parser::H
 
  protected:
   // io::net::udp::Receiver::Handler
-  void operator()(io::net::udp::Receiver::Read const &) override;
-  void operator()(io::net::udp::Receiver::Error const &) override;
+  void operator()(Trace<io::net::udp::Receiver::Read> const &) override;
+  void operator()(Trace<io::net::udp::Receiver::Error> const &) override;
 
   // Parser::Handler
   void operator()(Trace<Parser::Heartbeat> const &, tools::Header const &) override;

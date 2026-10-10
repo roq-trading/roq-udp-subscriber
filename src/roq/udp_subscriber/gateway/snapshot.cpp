@@ -95,8 +95,8 @@ void Snapshot::operator()(Event<Timer> const &event) {
 void Snapshot::operator()(metrics::Writer &) const {
 }
 
-void Snapshot::operator()(io::net::udp::Receiver::Read const &read) {
-  TraceInfo trace_info;
+void Snapshot::operator()(Trace<io::net::udp::Receiver::Read> const &event) {
+  auto &[trace_info, read] = event;
   auto parse = [&](auto &header, auto &payload) {
     log::info<5>("header={}, len(payload)={}"sv, header, std::size(payload));
     // note! different session id drops
@@ -145,7 +145,8 @@ void Snapshot::operator()(io::net::udp::Receiver::Read const &read) {
   }
 }
 
-void Snapshot::operator()(io::net::udp::Receiver::Error const &error) {
+void Snapshot::operator()(Trace<io::net::udp::Receiver::Error> const &event) {
+  auto &[trace_info, error] = event;
   log::fatal("Error: what={}"sv, error.what);
 }
 

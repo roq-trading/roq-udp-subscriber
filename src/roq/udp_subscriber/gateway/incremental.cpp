@@ -96,8 +96,8 @@ void Incremental::operator()(Event<Timer> const &event) {
 void Incremental::operator()(metrics::Writer &) const {
 }
 
-void Incremental::operator()(io::net::udp::Receiver::Read const &read) {
-  TraceInfo trace_info;
+void Incremental::operator()(Trace<io::net::udp::Receiver::Read> const &event) {
+  auto &[trace_info, read] = event;
   auto parse = [&](auto &header, auto &payload) {
     log::info<5>("header={}, len(payload)={}"sv, header, std::size(payload));
     if (header.session_id != shared_.session_id) {  // note! different session_id will reset
@@ -145,7 +145,8 @@ void Incremental::operator()(io::net::udp::Receiver::Read const &read) {
   }
 }
 
-void Incremental::operator()(io::net::udp::Receiver::Error const &error) {
+void Incremental::operator()(Trace<io::net::udp::Receiver::Error> const &event) {
+  auto &[trace_info, error] = event;
   log::fatal("Error: what={}"sv, error.what);
 }
 
