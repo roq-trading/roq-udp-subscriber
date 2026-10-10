@@ -76,19 +76,19 @@ Incremental::Incremental(Handler &handler, io::Context &context, uint16_t stream
     : handler_{handler}, stream_id_{stream_id}, shared_{shared}, receivers_{create_receivers<decltype(receivers_)>(*this, shared.settings, context)} {
 }
 
-void Incremental::operator()(Event<Start> const &) {
+void Incremental::operator()(Trace<Start> const &) {
 }
 
-void Incremental::operator()(Event<Stop> const &) {
+void Incremental::operator()(Trace<Stop> const &) {
 }
 
-void Incremental::operator()(Event<Timer> const &event) {
+void Incremental::operator()(Trace<Timer> const &event) {
+  auto &[trace_info, timer] = event;
   if (!last_update_time_.count()) {
     return;
   }
-  if ((last_update_time_ + shared_.settings.misc.udp_heartbeat_timeout) < event.value.now) {
+  if ((last_update_time_ + shared_.settings.misc.udp_heartbeat_timeout) < timer.now) {
     last_update_time_ = {};
-    TraceInfo trace_info;
     publish_stream_status(trace_info, supports_, ConnectionStatus::DISCONNECTED);
   }
 }

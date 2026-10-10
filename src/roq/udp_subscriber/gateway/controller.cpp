@@ -23,21 +23,30 @@ Controller::Controller(server::Dispatcher &dispatcher, Settings const &settings,
       incremental_{*this, context, ++stream_id_, shared_} {
 }
 
-void Controller::operator()(Event<Start> const &event) {
+void Controller::operator()(Trace<Start> const &event) {
   log::info("Starting..."sv);
   snapshot_(event);
   incremental_(event);
 }
 
-void Controller::operator()(Event<Stop> const &event) {
+void Controller::operator()(Trace<Stop> const &event) {
   log::info("Stopping..."sv);
   incremental_(event);
   snapshot_(event);
 }
 
-void Controller::operator()(Event<Timer> const &event) {
+void Controller::operator()(Trace<Timer> const &event) {
   snapshot_(event);
   incremental_(event);
+}
+
+void Controller::operator()(Event<Connected> const &) {
+}
+
+void Controller::operator()(Event<Disconnected> const &) {
+}
+
+void Controller::operator()(Event<Subscribe> const &) {
 }
 
 void Controller::operator()(Event<Control> const &event) {
@@ -54,15 +63,6 @@ void Controller::operator()(Event<Control> const &event) {
       dispatcher_(State::DISABLED);
       break;
   }
-}
-
-void Controller::operator()(Event<Connected> const &) {
-}
-
-void Controller::operator()(Event<Disconnected> const &) {
-}
-
-void Controller::operator()(Event<Subscribe> const &) {
 }
 
 uint16_t Controller::operator()(
