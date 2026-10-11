@@ -107,9 +107,10 @@ void Controller::operator()(Trace<GatewaySettings> const &) {
   // dispatcher_(event); // XXX FIXME no API
 }
 
+// note! order management is not supported (reason: string_map not populated)
 void Controller::operator()(Trace<StreamStatus> const &event) {
-  // note! order management is not supported (reason: string_map not populated)
-  if (std::empty(event.value.account)) {
+  auto &[trace_info, stream_status] = event;
+  if (std::empty(stream_status.account)) {
     dispatcher_(event);
   }
 }
