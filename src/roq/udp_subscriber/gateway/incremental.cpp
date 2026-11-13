@@ -324,9 +324,10 @@ void Incremental::publish_stream_status(TraceInfo const &trace_info, Mask<Suppor
         .connection_status = connection_status_,
         .reason = {},
         .interface = {},
+        .proxy = {},
+        .peer = {},
         .authority = {},
         .path = {},
-        .proxy = {},
     };
     create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
