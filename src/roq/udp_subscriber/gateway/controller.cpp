@@ -46,11 +46,11 @@ void Controller::operator()(Event<Connected> const &) {
 void Controller::operator()(Event<Disconnected> const &) {
 }
 
-void Controller::operator()(Event<Subscribe> const &) {
+void Controller::operator()(Trace<Subscribe> const &) {
 }
 
-void Controller::operator()(Event<Control> const &event) {
-  auto &[message_info, control] = event;
+void Controller::operator()(Trace<Control> const &event) {
+  auto &[trace_info, control] = event;
   switch (control.action) {
     using enum Action;
     case UNDEFINED:
@@ -65,13 +65,25 @@ void Controller::operator()(Event<Control> const &event) {
   }
 }
 
-uint16_t Controller::operator()(
-    Event<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, [[maybe_unused]] std::string_view const &request_id) {
+void Controller::operator()(Trace<server::oms::OrderActionBatchBegin> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+void Controller::operator()(Trace<server::oms::OrderActionBatchCommit> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+void Controller::operator()(Trace<server::oms::OrderActionBatchRollback> const &) {
   throw server::oms::NotSupported{"not supported"sv};
 }
 
 uint16_t Controller::operator()(
-    Event<ModifyOrder> const &,
+    Trace<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, [[maybe_unused]] std::string_view const &request_id) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+uint16_t Controller::operator()(
+    Trace<ModifyOrder> const &,
     server::oms::Order const &,
     server::oms::RefData const &,
     [[maybe_unused]] std::string_view const &request_id,
@@ -80,7 +92,7 @@ uint16_t Controller::operator()(
 }
 
 uint16_t Controller::operator()(
-    Event<CancelOrder> const &,
+    Trace<CancelOrder> const &,
     server::oms::Order const &,
     server::oms::RefData const &,
     [[maybe_unused]] std::string_view const &request_id,
@@ -88,15 +100,15 @@ uint16_t Controller::operator()(
   throw server::oms::NotSupported{"not supported"sv};
 }
 
-uint16_t Controller::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
+uint16_t Controller::operator()(Trace<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
   throw server::oms::NotSupported{"not supported"sv};
 }
 
-uint16_t Controller::operator()(Event<MassQuote> const &) {
+uint16_t Controller::operator()(Trace<MassQuote> const &) {
   throw server::oms::NotSupported{"not supported"sv};
 }
 
-uint16_t Controller::operator()(Event<CancelQuotes> const &) {
+uint16_t Controller::operator()(Trace<CancelQuotes> const &) {
   throw server::oms::NotSupported{"not supported"sv};
 }
 
