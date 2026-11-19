@@ -40,10 +40,10 @@ void Controller::operator()(Trace<Timer> const &event) {
   incremental_(event);
 }
 
-void Controller::operator()(Event<Connected> const &) {
+void Controller::operator()(Trace<Connected> const &, [[maybe_unused]] uint8_t user_id) {
 }
 
-void Controller::operator()(Event<Disconnected> const &) {
+void Controller::operator()(Trace<Disconnected> const &, [[maybe_unused]] uint8_t user_id) {
 }
 
 void Controller::operator()(Trace<Subscribe> const &) {
