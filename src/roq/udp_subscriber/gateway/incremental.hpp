@@ -41,18 +41,22 @@ struct Incremental final : public io::net::udp::Receiver::Handler, public Parser
 
   Incremental(Incremental const &) = delete;
 
+  // server::Stream
+
+  void operator()(metrics::Writer &) const;
+
   void operator()(Trace<Start> const &);
   void operator()(Trace<Stop> const &);
   void operator()(Trace<Timer> const &);
 
-  void operator()(metrics::Writer &) const;
-
  protected:
   // io::net::udp::Receiver::Handler
+
   void operator()(Trace<io::net::udp::Receiver::Read> const &) override;
   void operator()(Trace<io::net::udp::Receiver::Error> const &) override;
 
   // Parser::Handler
+
   void operator()(Trace<Parser::Heartbeat> const &, tools::Header const &) override;
   void operator()(Trace<GatewaySettings> const &, tools::Header const &) override;
   void operator()(Trace<StreamStatus> const &, tools::Header const &) override;

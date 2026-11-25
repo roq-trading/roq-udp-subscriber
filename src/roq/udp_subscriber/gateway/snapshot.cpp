@@ -75,6 +75,11 @@ Snapshot::Snapshot(Handler &handler, io::Context &context, uint16_t stream_id, S
     : handler_{handler}, stream_id_{stream_id}, shared_{shared}, receivers_{create_receivers<decltype(receivers_)>(*this, shared.settings, context)} {
 }
 
+// server::Stream
+
+void Snapshot::operator()(metrics::Writer &) const {
+}
+
 void Snapshot::operator()(Trace<Start> const &) {
 }
 
@@ -90,9 +95,6 @@ void Snapshot::operator()(Trace<Timer> const &event) {
     last_update_time_ = {};
     publish_stream_status(trace_info, supports_, ConnectionStatus::DISCONNECTED);
   }
-}
-
-void Snapshot::operator()(metrics::Writer &) const {
 }
 
 void Snapshot::operator()(Trace<io::net::udp::Receiver::Read> const &event) {
